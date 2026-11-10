@@ -47,9 +47,9 @@ local MenuModOk, MenuModule = pcall(require, GameGui:WaitForChild("WorldMenu"))
 local RolesOk, RolesModule = pcall(require, Shared:FindFirstChild("Roles"))
 local SfxOk, SfxModule = pcall(require, Shared:FindFirstChild("Sfx"))
 
-local WindUI = loadstring(game:HttpGet(
-    "https://raw.githubusercontent.com/Footagesus/WindUI/refs/heads/main/main.lua"
-))()
+
+local WindUI = loadstring(readfile("WindUI.lua"))()
+    
 
 ---------------------------------------------------------------------
 -- PENGATURAN & DATA
