@@ -35,12 +35,12 @@ local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local Shared = ReplicatedStorage:WaitForChild("Shared")
 local WorldRemotes = ReplicatedStorage:WaitForChild("WorldRemotes")
 -- Remote lama (versi game sebelum ByteNet). Hanya dipakai kalau fungsi baru tidak ada.
-local SetTileRemote = WorldRemotes:FindFirstChild("SetTile")
-
-local ItemDB = require(Shared.ItemDB)
-local InventoryModule = require(Shared.Inventory)
-local NetOk, Net = pcall(require, Shared.Net)
-
+local SetTileRemote = WorldRemotes:FindFir
+local ItemDBOk, ItemDB = pcall(require, Shared:WaitForChild("ItemDB", 10))
+if not ItemDBOk then ItemDB = {} end
+local InvOk, InventoryModule = pcall(require, Shared:WaitForChild("Inventory", 10))
+if not InvOk then InventoryModule = {} end
+local NetOk, Net = pcall(require, Shared:WaitForChild("Net", 10))
 local GameGui = PlayerGui:WaitForChild("GameGui")
 local ParticlesOk, ParticlesModule = pcall(require, GameGui:WaitForChild("Particles"))
 local MenuModOk, MenuModule = pcall(require, GameGui:WaitForChild("WorldMenu"))
