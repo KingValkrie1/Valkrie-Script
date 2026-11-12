@@ -49,7 +49,7 @@ local MenuModOk, MenuModule = pcall(require, GameGui:WaitForChild("WorldMenu", 1
 local RolesOk, RolesModule = pcall(require, Shared:FindFirstChild("Roles"))
 local SfxOk, SfxModule = pcall(require, Shared:FindFirstChild("Sfx"))
 
-local Fluent = loadstring(game:HttpGet("https://github.com/StyearX/Fluent-Modded/releases/download/Fluent/FluentPro", true))()
+local Fluent = loadstring(readfile("FluentPro.lua"))()
 local WindUI = Fluent -- alias supaya kode lama yang masih pakai WindUI tetap jalan
 
 ---------------------------------------------------------------------
