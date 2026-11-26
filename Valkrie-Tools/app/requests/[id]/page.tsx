@@ -17,7 +17,7 @@ export default async function RequestDetailPage({ params }: { params: { id: stri
   ]);
   if (!row) notFound();
 
-  const ids = [...new Set((commentRows || []).map((comment) => comment.user_id))];
+  const ids = (commentRows || []).map((comment) => comment.user_id).filter((id, index, allIds) => allIds.indexOf(id) === index);
   const { data: authors } = ids.length ? await supabase.from('public_profiles').select('id,user_id,display_name,role,membership_tier').in('id', ids) : { data: [] };
   const authorMap = new Map((authors || []).map((author) => [author.id, author]));
   const comments: PublicComment[] = (commentRows || []).map((comment) => {
