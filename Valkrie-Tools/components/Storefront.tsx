@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState, type PointerEvent as ReactPointerEvent } from 'react';
-import { Bell, Bookmark, ChevronRight, CircleHelp, Clock3, Crown, Gamepad2, Headphones, Heart, House, LockKeyhole, Menu, MessageSquarePlus, Moon, Search, Settings2, Sun, UserRound, Volume2, VolumeX, X, Zap } from 'lucide-react';
+import { Bell, Bookmark, ChevronRight, CircleHelp, Clock3, Crown, Gamepad2, Headphones, Heart, House, LockKeyhole, Menu, MessageSquarePlus, Moon, Search, Settings2, Sun, UserRound, Volume2, VolumeX, Wrench, X, Zap } from 'lucide-react';
 import { categories, products, type Product } from '@/data/products';
 
 const channelUrl = 'https://whatsapp.com/channel/0029VbAq9wH4inozYo8E9z2s';
@@ -29,7 +29,7 @@ export function Storefront() {
 
   const filtered = useMemo(() => products.filter((product) => {
     const categoryMatch = category === 'Semua' || (category === 'Favorit' ? favorites.includes(product.id) : product.category === category);
-    const queryMatch = `${product.name} ${product.game} ${product.category}`.toLowerCase().includes(query.toLowerCase());
+    const queryMatch = `${product.name} ${product.platform} ${product.category}`.toLowerCase().includes(query.toLowerCase());
     return categoryMatch && queryMatch;
   }), [category, favorites, query]);
   const recentlyViewed = recent.map((id) => products.find((product) => product.id === id)).filter((product): product is Product => Boolean(product));
@@ -41,7 +41,7 @@ export function Storefront() {
   function openProduct(product: Product) {
     const next = [product.id, ...recent.filter((id) => id !== product.id)].slice(0, 5);
     setRecent(next); localStorage.setItem('valkrie-recent', JSON.stringify(next));
-    setToast(`Detail ${product.name} belum dikonfigurasi.`);
+    window.open(product.websiteUrl, '_blank', 'noopener,noreferrer');
   }
   function toggleTheme() { const next = !light; setLight(next); localStorage.setItem('valkrie-theme', next ? 'light' : 'dark'); }
   function navigateTo(id: string, tab: string) {
@@ -69,9 +69,9 @@ export function Storefront() {
     <button className={`store-art art-${product.tone}`} onClick={() => openProduct(product)} aria-label={`Lihat ${product.name}`}>
       <span className="art-glow" /><span className="art-emblem">{product.icon}</span>
       {product.hot && <span className="store-hot">HOT</span>}
-      <span className="store-game"><i>{product.icon.slice(0, 1)}</i>{product.game}</span>
+      <span className="store-game"><i>{product.icon.slice(0, 1)}</i>{product.platform}</span>
     </button>
-    <div className="store-status"><span className={product.status === 'BARU' ? 'status-new' : product.status === 'UPDATE' ? 'status-update' : ''}>{product.status}</span><span>GRATIS</span></div>
+    <div className="store-status"><span className={product.status === 'BARU' ? 'status-new' : product.status === 'UPDATE' ? 'status-update' : ''}>{product.status}</span><span>BUKA WEB ↗</span></div>
     <span className="store-category">{product.category}</span>
     <button className="store-product-name" onClick={() => openProduct(product)}>{product.name}</button>
   </article>;
@@ -89,18 +89,18 @@ export function Storefront() {
     <main id="top" className="store-main">
       <nav className="store-categories" aria-label="Kategori produk">{categories.map((name) => <button key={name} className={`category-chip ${category === name ? 'active' : ''}`} onClick={() => setCategory(name)}>{name}<small>{categoryCount(name)}</small></button>)}</nav>
       <form className="store-search" onSubmit={(event) => event.preventDefault()}><Search size={18} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Cari produk atau kategori..." aria-label="Cari produk atau kategori" /><button aria-label="Cari"><Search size={18} /></button></form>
-      <section className="store-hero" aria-labelledby="store-title"><div className="hero-noise" /><div className="store-hero-copy"><span className="store-open"><i /> BUKA 24 JAM</span><h1 id="store-title">Valkrie<span>X969</span></h1><p>Pusat tools dan koleksi digital game favoritmu.</p><small>Penyedia license otomatis · pilihan gratis tersedia</small><a href="#products" className="store-hero-button">Jelajahi koleksi <ChevronRight size={16} /></a></div><div className="hero-emblem" aria-hidden="true"><Gamepad2 size={78} /></div></section>
-      <section className="store-stats" aria-label="Statistik katalog"><article><b>98</b><span>Tools tersedia</span></article><article><b>7</b><span>Game</span></article><article><b>100%</b><span>Gratis</span></article></section>
+      <section className="store-hero" aria-labelledby="store-title"><div className="hero-noise" /><div className="store-hero-copy"><span className="store-open"><i /> KATALOG DIGITAL</span><h1 id="store-title">Valkrie<span>X969</span></h1><p>Temukan tools legal untuk kebutuhan kreatif, produktivitas, dan pengembangan.</p><small>Direktori pilihan · informasi yang jelas · akses praktis</small><a href="#products" className="store-hero-button">Jelajahi katalog <ChevronRight size={16} /></a></div><div className="hero-emblem" aria-hidden="true"><Wrench size={78} /></div></section>
+      <section className="store-stats" aria-label="Statistik katalog"><article><b>{products.length}</b><span>Tools di katalog</span></article><article><b>{new Set(products.map((product) => product.category)).size}</b><span>Kategori</span></article><article><b>{products.length}</b><span>Tautan resmi</span></article></section>
       <section className="store-quick" id="quick-links"><h2 className="store-section-title">Akses <em>cepat</em></h2><div className="quick-grid">
-        <a href="#products" className="quick-link quick-hero" onPointerDown={quickRipple}><span className="quick-icon icon-catalog"><Gamepad2 size={21} /></span><span className="quick-copy"><b>Semua Tools</b><small>98+ Tools Available</small></span><span className="quick-label">EXPLORE</span><ChevronRight className="quick-arrow" size={17} /><span className="quick-orbit" aria-hidden="true" /></a>
-        <button className="quick-link quick-half quick-request" onPointerDown={quickRipple} onClick={() => setToast('Fitur request akan segera tersedia.')}><span className="quick-icon icon-request"><CircleHelp size={20} /></span><span className="quick-copy"><b>Request Mod</b><small>Request your favorite mod</small></span><ChevronRight className="quick-arrow" size={16} /></button>
-        <a className="quick-link quick-half quick-support" href="https://wa.me/" target="_blank" rel="noreferrer" onPointerDown={quickRipple}><span className="quick-icon icon-admin"><Headphones size={20} /></span><span className="quick-copy"><b>Chat Admin</b><small>Help &amp; Support</small></span><ChevronRight className="quick-arrow" size={16} /></a>
-        <a className="quick-link quick-wide quick-updates" href={channelUrl} target="_blank" rel="noreferrer" onPointerDown={quickRipple}><span className="quick-icon icon-updates"><Bell size={20} /></span><span className="quick-copy"><b>Saluran Update</b><small>Latest mod info</small></span><span className="quick-label">JOIN CHANNEL</span><ChevronRight className="quick-arrow" size={16} /></a>
+        <a href="#products" className="quick-link quick-hero" onPointerDown={quickRipple}><span className="quick-icon icon-catalog"><Gamepad2 size={21} /></span><span className="quick-copy"><b>Semua Tools</b><small>{products.length} contoh tools di katalog</small></span><span className="quick-label">JELAJAHI</span><ChevronRight className="quick-arrow" size={17} /><span className="quick-orbit" aria-hidden="true" /></a>
+        <a href="/requests" className="quick-link quick-half quick-request" onPointerDown={quickRipple}><span className="quick-icon icon-request"><CircleHelp size={20} /></span><span className="quick-copy"><b>Ajukan Tool</b><small>Sampaikan ide tool baru</small></span><ChevronRight className="quick-arrow" size={16} /></a>
+        <a className="quick-link quick-half quick-support" href={channelUrl} target="_blank" rel="noreferrer" onPointerDown={quickRipple}><span className="quick-icon icon-admin"><Headphones size={20} /></span><span className="quick-copy"><b>Info &amp; Bantuan</b><small>Buka kanal WhatsApp</small></span><ChevronRight className="quick-arrow" size={16} /></a>
+        <a className="quick-link quick-wide quick-updates" href={channelUrl} target="_blank" rel="noreferrer" onPointerDown={quickRipple}><span className="quick-icon icon-updates"><Bell size={20} /></span><span className="quick-copy"><b>Saluran Update</b><small>Info katalog terbaru</small></span><span className="quick-label">BUKA CHANNEL</span><ChevronRight className="quick-arrow" size={16} /></a>
       </div></section>
       {recentlyViewed.length > 0 && <section className="store-section"><h2 className="store-section-title">Terakhir <em>dibuka</em></h2><div className="recent-list">{recentlyViewed.map((product) => <button className={`recent-item art-${product.tone}`} key={product.id} onClick={() => openProduct(product)}><span>{product.icon}</span><b>{product.name}</b></button>)}</div></section>}
       <section className="store-section"><h2 className="store-section-title">Produk <em>terlaris</em></h2><div className="best-list">{products.slice(0, 5).map((product, index) => card(product, index, true))}</div></section>
       <section className="store-section" id="products"><div className="store-section-heading"><h2 className="store-section-title">Semua <em>produk</em></h2><span>{filtered.length} item</span></div>{filtered.length ? <div className="store-grid">{filtered.map((product, index) => card(product, index))}</div> : <div className="store-empty">Belum ada produk untuk filter ini.</div>}</section>
-      <footer id="footer" className="store-footer"><a href="#top">VALKRIE X969</a><span>Valkrie Tools · koleksi digital game</span><a href="#top">Kembali ke atas ↑</a></footer>
+      <footer id="footer" className="store-footer"><a href="#top">VALKRIE X969</a><span>Valkrie Tools · katalog digital</span><a href="#top">Kembali ke atas ↑</a></footer>
     </main>
     <nav className="bottom-nav" aria-label="Navigasi utama">
       <button className={activeNav === 'home' ? 'active' : ''} aria-current={activeNav === 'home' ? 'page' : undefined} onClick={() => navigateTo('top', 'home')}><House size={19} /><span>Beranda</span></button>
@@ -120,7 +120,7 @@ export function Storefront() {
         <p className="profile-note">Daftar dengan email untuk mendapatkan User ID. Favorit saat ini tersimpan di browser ini.</p>
       </section>
     </div>}
-    <div className="store-fab"><button aria-label={muted ? 'Suara mati' : 'Matikan suara'} onClick={() => { setMuted(!muted); setToast(muted ? 'Suara dinyalakan.' : 'Suara dimatikan.'); }}>{muted ? <VolumeX size={18} /> : <Volume2 size={18} />}</button><button aria-label="Pengaturan" onClick={toggleTheme}><Settings2 size={18} /></button><a aria-label="Customer service" href="https://wa.me/" target="_blank" rel="noreferrer"><Headphones size={18} /></a></div>
+    <div className="store-fab"><button aria-label={muted ? 'Suara mati' : 'Matikan suara'} onClick={() => { setMuted(!muted); setToast(muted ? 'Suara dinyalakan.' : 'Suara dimatikan.'); }}>{muted ? <VolumeX size={18} /> : <Volume2 size={18} />}</button><button aria-label="Pengaturan" onClick={toggleTheme}><Settings2 size={18} /></button><a aria-label="Info dan bantuan WhatsApp" href={channelUrl} target="_blank" rel="noreferrer"><Headphones size={18} /></a></div>
     {toast && <div className="store-toast" role="status">{toast}</div>}
   </div>;
 }

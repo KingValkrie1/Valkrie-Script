@@ -1,25 +1,26 @@
 export type Product = {
   id: string;
   name: string;
-  game: string;
+  platform: string;
   category: string;
   icon: string;
   status: string;
   tone: string;
   rank?: number;
   hot?: boolean;
+  websiteUrl: string;
 };
 
 // Edit daftar ini untuk menambah atau mengubah kartu produk di halaman utama.
 export const products: Product[] = [
-  { id: 'xyroz', name: 'XYROZ - MLBB', game: 'Mobile Legends', category: 'Mobile Legends', icon: 'ML', status: 'TERSEDIA', tone: 'violet', rank: 2, hot: true },
-  { id: 'necro', name: 'NECRO TOOLKIT', game: 'Free Fire', category: 'Free Fire', icon: 'FF', status: 'TERSEDIA', tone: 'ember', rank: 3 },
-  { id: 'codm', name: 'CODM LOADOUT', game: 'Call of Duty Mobile', category: 'CODM', icon: 'CoD', status: 'UPDATE', tone: 'steel', rank: 4 },
-  { id: 'mlbb', name: 'MLBB TOOLKIT', game: 'Mobile Legends', category: 'Mobile Legends', icon: 'ML', status: 'TERSEDIA', tone: 'blue', rank: 5 },
-  { id: 'ff-max', name: 'FREE FIRE MAX', game: 'Free Fire', category: 'Free Fire', icon: 'FF', status: 'BARU', tone: 'gold', hot: true },
-  { id: 'codm-operator', name: 'OPERATOR PACK', game: 'Call of Duty Mobile', category: 'CODM', icon: 'CoD', status: 'TERSEDIA', tone: 'green' },
-  { id: 'arena', name: 'ARENA UTILITY', game: 'Arena Breakout', category: 'Tools', icon: 'AB', status: 'TERSEDIA', tone: 'sand' },
-  { id: 'pubg', name: 'PUBG MOBILE KIT', game: 'PUBG Mobile', category: 'Tools', icon: 'PUBG', status: 'UPDATE', tone: 'orange' },
+  { id: 'photopea', name: 'Photopea Editor', platform: 'WEB APP', category: 'Design Tools', icon: 'P', status: 'TERSEDIA', tone: 'violet', rank: 2, hot: true, websiteUrl: 'https://www.photopea.com/' },
+  { id: 'canva', name: 'Canva Design', platform: 'WEB APP', category: 'Design Tools', icon: 'C', status: 'TERSEDIA', tone: 'ember', rank: 3, websiteUrl: 'https://www.canva.com/' },
+  { id: 'figma', name: 'Figma Design', platform: 'WEB APP', category: 'Design Tools', icon: 'F', status: 'TERSEDIA', tone: 'steel', rank: 4, websiteUrl: 'https://www.figma.com/' },
+  { id: 'vscode', name: 'Visual Studio Code', platform: 'DESKTOP APP', category: 'Developer Tools', icon: 'VS', status: 'TERSEDIA', tone: 'blue', rank: 5, websiteUrl: 'https://code.visualstudio.com/' },
+  { id: 'notion', name: 'Notion Workspace', platform: 'WEB APP', category: 'Productivity', icon: 'N', status: 'BARU', tone: 'gold', hot: true, websiteUrl: 'https://www.notion.so/' },
+  { id: 'docs', name: 'Google Docs', platform: 'WEB APP', category: 'Productivity', icon: 'D', status: 'TERSEDIA', tone: 'green', websiteUrl: 'https://docs.google.com/' },
+  { id: 'sheets', name: 'Google Sheets', platform: 'WEB APP', category: 'Productivity', icon: 'S', status: 'TERSEDIA', tone: 'sand', websiteUrl: 'https://sheets.google.com/' },
+  { id: 'pdf24', name: 'PDF24 Tools', platform: 'WEB APP', category: 'Utility', icon: 'PDF', status: 'TERSEDIA', tone: 'orange', websiteUrl: 'https://tools.pdf24.org/' },
 ];
 
-export const categories = ['Semua', 'Favorit', 'Free Fire', 'Mobile Legends', 'CODM', 'Tools'];
+export const categories = ['Semua', 'Favorit'].concat(Array.from(new Set(products.map((product) => product.category))));
