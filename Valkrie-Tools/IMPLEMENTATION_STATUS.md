@@ -14,6 +14,7 @@ Fitur dikerjakan bertahap sesuai waktu yang tersedia. Kode tahap awal ada di bra
 - Export CSV admin: filter status/bulan, pilih kolom, hitung vote, dan riwayat export.
 - Aksi massal panel admin untuk memilih beberapa request lalu mengubah statusnya, dengan pencatatan audit per request.
 - Halaman profil publik `/u/[username]` menampilkan ID, badge, detail aman untuk publik, dan daftar request publik milik pengguna.
+- Bookmark request tersedia dari halaman detail, tersimpan per akun, dan punya halaman `/requests/saved`.
 - `.env.example` dan petunjuk setup awal di README.
 
 ## Belum dikerjakan atau belum tersambung

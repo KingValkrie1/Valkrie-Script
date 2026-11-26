@@ -24,6 +24,11 @@ export default async function RequestDetailPage({ params }: { params: { id: stri
     const author = authorMap.get(comment.user_id);
     return { ...comment, author_name: author?.display_name || 'Pengguna', author_user_id: author?.user_id || '', author_role: author?.role || 'member', author_membership_tier: author?.membership_tier || 'ordinary' };
   });
+  let isBookmarked = false;
+  if (user) {
+    const { data: bookmark } = await supabase.from('request_bookmarks').select('request_id').eq('request_id', params.id).eq('user_id', user.id).maybeSingle();
+    isBookmarked = Boolean(bookmark);
+  }
 
-  return <RequestDetail request={row as BoardRequest} comments={comments} loggedIn={Boolean(user)} viewerId={user?.id || null} />;
+  return <RequestDetail request={{ ...row, is_bookmarked: isBookmarked } as BoardRequest} comments={comments} loggedIn={Boolean(user)} viewerId={user?.id || null} />;
 }

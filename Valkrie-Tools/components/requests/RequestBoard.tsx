@@ -27,6 +27,7 @@ export type BoardRequest = {
   updated_at: string;
   vote_count: number;
   comment_count: number;
+  is_bookmarked?: boolean;
 };
 
 const categoryNames: Record<string, string> = {

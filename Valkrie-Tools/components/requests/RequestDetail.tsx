@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import { ArrowUp, Copy, Send } from 'lucide-react';
+import { RequestBookmark } from '@/components/requests/RequestBookmark';
 import type { BoardRequest } from '@/components/requests/RequestBoard';
 
 export type PublicComment = { id: string; user_id: string; body: string; created_at: string; author_name: string; author_user_id: string; author_role: 'member' | 'admin'; author_membership_tier: 'ordinary' | 'vip' };
@@ -69,7 +70,7 @@ export function RequestDetail({ request, comments, loggedIn, viewerId }: { reque
   }
 
   return <main className="request-page">
-    <header className="request-top"><Link href="/requests" className="request-brand">← <span>REQUEST BOARD</span></Link><Link href="/" className="request-brand"><span>VALKRIE<span>X969</span></span></Link></header>
+    <header className="request-top"><Link href="/requests" className="request-brand">← <span>REQUEST BOARD</span></Link><Link href={loggedIn ? '/requests/saved' : '/login'} className="request-brand">REQUEST TERSIMPAN</Link></header>
     <article className="request-detail-card">
       <div className="request-card-meta"><span className={`request-status status-${request.status}`}>{statuses[request.status]}</span><span>{categories[request.category] || request.category}</span>{request.pinned && <span className="request-pin">PINNED</span>}<span className="request-number">REQ-{request.request_number}</span></div>
       <h1>{request.name}</h1>
@@ -79,7 +80,7 @@ export function RequestDetail({ request, comments, loggedIn, viewerId }: { reque
       {request.reference_url && <a className="request-reference" href={request.reference_url} target="_blank" rel="noreferrer">Buka link referensi ↗</a>}
       {request.admin_reply && <div className="request-admin-reply"><b>Balasan admin</b><p>{request.admin_reply}</p></div>}
       {request.rejection_reason && <div className="request-rejection"><b>Alasan penolakan</b><p>{request.rejection_reason}</p></div>}
-      <div className="request-detail-actions"><button className="request-vote" onClick={vote}><ArrowUp size={17} /><span>{request.vote_count}</span><small>Vote</small></button><button className="request-share" onClick={copyLink}><Copy size={15} /> Salin link</button>{canEdit && <><button className="request-share" onClick={() => setEditing(!editing)}>{editing ? 'Tutup edit' : 'Edit request'}</button><button className="request-delete" disabled={busy} onClick={deleteRequest}>Hapus</button></>}</div>
+      <div className="request-detail-actions"><button className="request-vote" onClick={vote}><ArrowUp size={17} /><span>{request.vote_count}</span><small>Vote</small></button><RequestBookmark requestId={request.id} initialSaved={request.is_bookmarked || false} loggedIn={loggedIn} /><button className="request-share" onClick={copyLink}><Copy size={15} /> Salin link</button>{canEdit && <><button className="request-share" onClick={() => setEditing(!editing)}>{editing ? 'Tutup edit' : 'Edit request'}</button><button className="request-delete" disabled={busy} onClick={deleteRequest}>Hapus</button></>}</div>
       {notice && <p className="request-notice" role="status">{notice}</p>}
       {editing && <form className="request-form request-edit-form" onSubmit={saveEdit}><h2>Edit request</h2><label>Nama tool<input name="name" defaultValue={request.name} minLength={2} maxLength={120} required /></label><label>Kategori<select name="category" defaultValue={request.category}>{Object.entries(categories).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></label><label>Deskripsi<textarea name="description" defaultValue={request.description} minLength={10} maxLength={5000} rows={4} required /></label><label>Link referensi<input name="referenceUrl" type="url" defaultValue={request.reference_url || ''} /></label><button className="request-submit-open" disabled={busy}>{busy ? 'Menyimpan…' : 'Simpan perubahan'}</button></form>}
     </article>
