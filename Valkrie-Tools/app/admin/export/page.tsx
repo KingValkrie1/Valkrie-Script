@@ -14,7 +14,7 @@ export default async function AdminExportPage() {
   if (profile?.role !== 'admin') redirect('/');
 
   const { data: logs } = await supabase.from('admin_activity').select('id,admin_id,details,created_at').eq('action', 'requests.export').order('created_at', { ascending: false }).limit(30);
-  const adminIds = [...new Set((logs || []).map((log) => log.admin_id))];
+  const adminIds = Array.from(new Set((logs || []).map((log) => log.admin_id)));
   const { data: admins } = adminIds.length ? await supabase.from('public_profiles').select('id,display_name').in('id', adminIds) : { data: [] };
   const names = new Map((admins || []).map((admin) => [admin.id, admin.display_name]));
   const history = (logs || []).map((log) => ({ id: log.id, details: log.details as Record<string, unknown>, created_at: log.created_at, admin_name: names.get(log.admin_id) || 'Admin' }));
