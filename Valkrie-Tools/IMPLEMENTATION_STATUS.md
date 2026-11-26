@@ -12,13 +12,14 @@ Fitur dikerjakan bertahap sesuai waktu yang tersedia. Kode tahap awal ada di bra
 - Panel request admin awal: ubah status, balas publik, alasan penolakan, pin, dan sembunyikan request.
 - Kelola VIP via User ID: preview akun, grant/perpanjang/cabut, durasi, catatan, dan audit history.
 - Export CSV admin: filter status/bulan, pilih kolom, hitung vote, dan riwayat export.
+- Aksi massal panel admin untuk memilih beberapa request lalu mengubah statusnya, dengan pencatatan audit per request.
 - `.env.example` dan petunjuk setup awal di README.
 
 ## Belum dikerjakan atau belum tersambung
 
 - Belum ada project Supabase milik pengguna, jadi database, email, login, dan role admin belum dapat dicoba.
 - Migration belum dijalankan atau diverifikasi terhadap project nyata.
-- Belum ada upload avatar, halaman katalog dari database, notifikasi email, bulk action, dan fitur lainnya.
+- Belum ada upload avatar, halaman katalog dari database, notifikasi email, dan fitur lainnya.
 - Project Supabase belum dibuat, jadi alur database masih berupa fondasi kode dan belum bisa digunakan langsung.
 
 ## Langkah kecil berikutnya
