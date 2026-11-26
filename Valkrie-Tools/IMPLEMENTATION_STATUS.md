@@ -18,6 +18,7 @@ Fitur dikerjakan bertahap sesuai waktu yang tersedia. Kode tahap awal ada di bra
 - Panel admin punya buku user dengan pencarian, badge tier, dan tautan langsung untuk mengatur VIP melalui User ID.
 - Kartu beranda kini mengarah ke situs resmi beberapa tools legal dan pencarian/kategori disesuaikan dengan katalog produktivitas, desain, dan developer.
 - Halaman publik `/vip` menjelaskan manfaat, aturan yang tetap setara, dan cara status VIP dikelola admin.
+- Profil pribadi menampilkan riwayat 20 request terakhir beserta status balasan admin.
 - `.env.example` dan petunjuk setup awal di README.
 
 ## Belum dikerjakan atau belum tersambung

@@ -12,6 +12,7 @@ export default async function ProfilePage() {
 
   const { data: profile } = await supabase.from('profiles').select('user_id, username, display_name, avatar_url, bio, city, role, membership_tier, vip_expires_at, vip_permanent, joined_at').eq('id', user.id).maybeSingle();
   if (!profile) return <main className="auth-shell"><section className="auth-card"><h1>Profil belum siap</h1><p>Database belum selesai disiapkan. Coba lagi nanti.</p><SignOutButton /></section></main>;
+  const { data: ownRequests } = await supabase.from('tool_requests').select('id,request_number,name,status,admin_reply,hidden,created_at').eq('user_id', user.id).order('created_at', { ascending: false }).limit(20);
 
   const vipActive = profile.membership_tier === 'vip' && (profile.vip_permanent || (profile.vip_expires_at && new Date(profile.vip_expires_at).getTime() > Date.now()));
   const badge = profile.role === 'admin' ? 'ADMIN' : vipActive ? 'RAKYAT VIP' : 'RAKYAT BIASA';
@@ -32,6 +33,7 @@ export default async function ProfilePage() {
       </dl>
       <EditProfileForm displayName={profile.display_name} bio={profile.bio} city={profile.city} canSetCity={Boolean(vipActive)} />
       <Link href={`/u/${profile.username}`} className="profile-home-link">Lihat profil publik →</Link>
+      <section className="profile-my-requests"><div><span className="auth-kicker">AKTIVITAS</span><h2>Request saya</h2></div>{ownRequests?.length ? ownRequests.map((item) => <article key={item.id}>{item.hidden ? <span>{item.name} <small>· disembunyikan admin</small></span> : <Link href={`/requests/${item.id}`}>{item.name} <small>· REQ-{item.request_number}</small></Link>}<b className={`request-status status-${item.status}`}>{({ pending: 'Menunggu', processing: 'Diproses', completed: 'Selesai', rejected: 'Ditolak', duplicate: 'Duplikat' } as Record<string, string>)[item.status] || item.status}</b><small>{item.admin_reply ? 'Sudah dibalas admin' : 'Belum dibalas admin'}</small></article>) : <p>Belum ada request yang kamu ajukan. <Link href="/requests">Buka Request Board</Link></p>}</section>
       <p className="auth-setup-note">Favorit katalog saat ini masih tersimpan di browser ini.</p>
       <SignOutButton />
       <Link href="/" className="profile-home-link">Kembali ke katalog</Link>
