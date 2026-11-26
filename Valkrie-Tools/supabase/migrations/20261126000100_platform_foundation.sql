@@ -429,3 +429,39 @@ create policy admin_activity_admin_add on public.admin_activity for insert to au
 
 create policy notification_preferences_self on public.notification_preferences for select to authenticated using (user_id = (select auth.uid()));
 create policy notification_preferences_update_self on public.notification_preferences for update to authenticated using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
+
+-- Public board view exposes only visible requests and safe public profile fields.
+create view public.public_request_board with (security_barrier = true) as
+select
+  r.id,
+  r.request_number,
+  r.user_id as author_uuid,
+  p.user_id as author_user_id,
+  p.username as author_username,
+  p.display_name as author_name,
+  p.avatar_url as author_avatar_url,
+  p.role as author_role,
+  p.membership_tier as author_membership_tier,
+  p.city as author_city,
+  r.name,
+  r.category,
+  r.description,
+  r.reference_url,
+  r.image_path,
+  r.tags,
+  r.status,
+  r.admin_reply,
+  r.rejection_reason,
+  r.pinned,
+  r.created_at,
+  r.updated_at,
+  r.completed_at,
+  count(distinct v.user_id)::integer as vote_count,
+  count(distinct c.id)::integer as comment_count
+from public.tool_requests r
+join public.public_profiles p on p.id = r.user_id
+left join public.request_votes v on v.request_id = r.id
+left join public.request_comments c on c.request_id = r.id
+where not r.hidden
+group by r.id, p.id;
+grant select on public.public_request_board to anon, authenticated;

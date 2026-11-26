@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState, type PointerEvent as ReactPointerEvent } from 'react';
-import { Bell, Bookmark, ChevronRight, CircleHelp, Clock3, Crown, Gamepad2, Headphones, Heart, House, LockKeyhole, Menu, Moon, Search, Settings2, Sun, UserRound, Volume2, VolumeX, X, Zap } from 'lucide-react';
+import { Bell, Bookmark, ChevronRight, CircleHelp, Clock3, Crown, Gamepad2, Headphones, Heart, House, LockKeyhole, Menu, MessageSquarePlus, Moon, Search, Settings2, Sun, UserRound, Volume2, VolumeX, X, Zap } from 'lucide-react';
 import { categories, products, type Product } from '@/data/products';
 
 const channelUrl = 'https://whatsapp.com/channel/0029VbAq9wH4inozYo8E9z2s';
@@ -46,6 +46,7 @@ export function Storefront() {
   function toggleTheme() { const next = !light; setLight(next); localStorage.setItem('valkrie-theme', next ? 'light' : 'dark'); }
   function navigateTo(id: string, tab: string) {
     setActiveNav(tab);
+    if (tab === 'request') { window.location.assign('/requests'); return; }
     if (tab === 'profile') { setProfileOpen(true); return; }
     setProfileOpen(false);
     if (tab === 'products') { setCategory('Semua'); setQuery(''); }
@@ -104,6 +105,7 @@ export function Storefront() {
     <nav className="bottom-nav" aria-label="Navigasi utama">
       <button className={activeNav === 'home' ? 'active' : ''} aria-current={activeNav === 'home' ? 'page' : undefined} onClick={() => navigateTo('top', 'home')}><House size={19} /><span>Beranda</span></button>
       <button className={activeNav === 'products' ? 'active' : ''} aria-current={activeNav === 'products' ? 'page' : undefined} onClick={() => navigateTo('products', 'products')}><Search size={19} /><span>Produk</span></button>
+      <button className={activeNav === 'request' ? 'active' : ''} aria-current={activeNav === 'request' ? 'page' : undefined} onClick={() => navigateTo('requests', 'request')}><MessageSquarePlus size={19} /><span>Request</span></button>
       <button className={activeNav === 'favorites' ? 'active' : ''} aria-current={activeNav === 'favorites' ? 'page' : undefined} onClick={() => navigateTo('products', 'favorites')}><Heart size={19} /><span>Favorit</span></button>
       <button className={activeNav === 'profile' ? 'active' : ''} aria-current={activeNav === 'profile' ? 'page' : undefined} onClick={() => navigateTo('profile', 'profile')}><UserRound size={19} /><span>Profil</span></button>
     </nav>
