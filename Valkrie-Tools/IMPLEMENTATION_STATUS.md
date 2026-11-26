@@ -15,6 +15,7 @@ Fitur dikerjakan bertahap sesuai waktu yang tersedia. Kode tahap awal ada di bra
 - Aksi massal panel admin untuk memilih beberapa request lalu mengubah statusnya, dengan pencatatan audit per request.
 - Halaman profil publik `/u/[username]` menampilkan ID, badge, detail aman untuk publik, dan daftar request publik milik pengguna.
 - Bookmark request tersedia dari halaman detail, tersimpan per akun, dan punya halaman `/requests/saved`.
+- Panel admin punya buku user dengan pencarian, badge tier, dan tautan langsung untuk mengatur VIP melalui User ID.
 - Kartu beranda kini mengarah ke situs resmi beberapa tools legal dan pencarian/kategori disesuaikan dengan katalog produktivitas, desain, dan developer.
 - `.env.example` dan petunjuk setup awal di README.
 

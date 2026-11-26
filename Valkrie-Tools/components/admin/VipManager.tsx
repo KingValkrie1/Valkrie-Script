@@ -5,8 +5,8 @@ import { useState, type FormEvent } from 'react';
 type AdminUser = { user_id: string; username: string; display_name: string; avatar_url: string | null; role: string; membership_tier: string; vip_expires_at: string | null; vip_permanent: boolean; joined_at: string; activeVip: boolean };
 type VipHistoryRow = { id: string; user_id: string; changed_by: string | null; action: string; duration_days: number | null; permanent: boolean; note: string | null; created_at: string; target_name: string; target_user_id: string; admin_name: string };
 
-export function VipManager({ history }: { history: VipHistoryRow[] }) {
-  const [userId, setUserId] = useState('');
+export function VipManager({ history, initialUserId = '' }: { history: VipHistoryRow[]; initialUserId?: string }) {
+  const [userId, setUserId] = useState(initialUserId);
   const [user, setUser] = useState<AdminUser | null>(null);
   const [operation, setOperation] = useState<'grant' | 'extend' | 'revoke'>('grant');
   const [duration, setDuration] = useState('30');
