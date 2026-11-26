@@ -1,0 +1,135 @@
+'use client';
+
+import { useEffect, useMemo, useState, type PointerEvent as ReactPointerEvent } from 'react';
+import { Bell, Bookmark, ChevronRight, CircleHelp, Clock3, Crown, Gamepad2, Headphones, Heart, House, LockKeyhole, Menu, Moon, Search, Settings2, Sun, UserRound, Volume2, VolumeX, X, Zap } from 'lucide-react';
+
+type Product = { id: string; name: string; game: string; category: string; icon: string; status: string; tone: string; rank?: number; hot?: boolean };
+const products: Product[] = [
+  { id: 'xyroz', name: 'XYROZ - MLBB', game: 'Mobile Legends', category: 'Mobile Legends', icon: 'ML', status: 'TERSEDIA', tone: 'violet', rank: 2, hot: true },
+  { id: 'necro', name: 'NECRO CHEAT', game: 'Free Fire', category: 'Free Fire', icon: 'FF', status: 'TERSEDIA', tone: 'ember', rank: 3 },
+  { id: 'codm', name: 'CODM LOADOUT', game: 'Call of Duty Mobile', category: 'CODM', icon: 'CoD', status: 'UPDATE', tone: 'steel', rank: 4 },
+  { id: 'mlbb', name: 'MLBB TOOLKIT', game: 'Mobile Legends', category: 'Mobile Legends', icon: 'ML', status: 'TERSEDIA', tone: 'blue', rank: 5 },
+  { id: 'ff-max', name: 'FREE FIRE MAX', game: 'Free Fire', category: 'Free Fire', icon: 'FF', status: 'BARU', tone: 'gold', hot: true },
+  { id: 'codm-operator', name: 'OPERATOR PACK', game: 'Call of Duty Mobile', category: 'CODM', icon: 'CoD', status: 'TERSEDIA', tone: 'green' },
+  { id: 'arena', name: 'ARENA UTILITY', game: 'Arena Breakout', category: 'Tools', icon: 'AB', status: 'TERSEDIA', tone: 'sand' },
+  { id: 'pubg', name: 'PUBG MOBILE KIT', game: 'PUBG Mobile', category: 'Tools', icon: 'PUBG', status: 'UPDATE', tone: 'orange' },
+];
+const categories = ['Semua', 'Favorit', 'Free Fire', 'Mobile Legends', 'CODM', 'Tools'];
+const channelUrl = 'https://whatsapp.com/channel/0029VbAq9wH4inozYo8E9z2s';
+
+export function Storefront() {
+  const [category, setCategory] = useState('Semua');
+  const [query, setQuery] = useState('');
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [recent, setRecent] = useState<string[]>([]);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [light, setLight] = useState(false);
+  const [muted, setMuted] = useState(true);
+  const [activeNav, setActiveNav] = useState('home');
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [toast, setToast] = useState('');
+
+  useEffect(() => {
+    try {
+      setFavorites(JSON.parse(localStorage.getItem('valkrie-favorites') || '[]'));
+      setRecent(JSON.parse(localStorage.getItem('valkrie-recent') || '[]'));
+      setLight(localStorage.getItem('valkrie-theme') === 'light');
+    } catch { /* Use an empty storefront state if saved data is unavailable. */ }
+  }, []);
+  useEffect(() => { if (!toast) return; const id = window.setTimeout(() => setToast(''), 2400); return () => window.clearTimeout(id); }, [toast]);
+
+  const filtered = useMemo(() => products.filter((product) => {
+    const categoryMatch = category === 'Semua' || (category === 'Favorit' ? favorites.includes(product.id) : product.category === category);
+    const queryMatch = `${product.name} ${product.game} ${product.category}`.toLowerCase().includes(query.toLowerCase());
+    return categoryMatch && queryMatch;
+  }), [category, favorites, query]);
+  const recentlyViewed = recent.map((id) => products.find((product) => product.id === id)).filter((product): product is Product => Boolean(product));
+
+  function toggleFavorite(id: string) {
+    const next = favorites.includes(id) ? favorites.filter((item) => item !== id) : [...favorites, id];
+    setFavorites(next); localStorage.setItem('valkrie-favorites', JSON.stringify(next));
+  }
+  function openProduct(product: Product) {
+    const next = [product.id, ...recent.filter((id) => id !== product.id)].slice(0, 5);
+    setRecent(next); localStorage.setItem('valkrie-recent', JSON.stringify(next));
+    setToast(`Detail ${product.name} belum dikonfigurasi.`);
+  }
+  function toggleTheme() { const next = !light; setLight(next); localStorage.setItem('valkrie-theme', next ? 'light' : 'dark'); }
+  function navigateTo(id: string, tab: string) {
+    setActiveNav(tab);
+    if (tab === 'profile') { setProfileOpen(true); return; }
+    setProfileOpen(false);
+    if (tab === 'products') { setCategory('Semua'); setQuery(''); }
+    if (tab === 'favorites') { setCategory('Favorit'); setQuery(''); }
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function quickRipple(event: ReactPointerEvent<HTMLAnchorElement | HTMLButtonElement>) {
+    const target = event.currentTarget;
+    const bounds = target.getBoundingClientRect();
+    target.style.setProperty('--ripple-x', `${event.clientX - bounds.left}px`);
+    target.style.setProperty('--ripple-y', `${event.clientY - bounds.top}px`);
+    target.classList.remove('is-rippling');
+    requestAnimationFrame(() => target.classList.add('is-rippling'));
+  }
+  const categoryCount = (name: string) => name === 'Semua' ? products.length : name === 'Favorit' ? favorites.length : products.filter((p) => p.category === name).length;
+
+  const card = (product: Product, index: number, ranked = false) => <article className="store-card" key={product.id}>
+    {ranked && <span className="store-rank">#{product.rank ?? index + 1}</span>}
+    <button className={`store-heart ${favorites.includes(product.id) ? 'is-favorite' : ''}`} aria-label={favorites.includes(product.id) ? 'Hapus favorit' : 'Tambah favorit'} aria-pressed={favorites.includes(product.id)} onClick={() => toggleFavorite(product.id)}><Heart size={17} /></button>
+    <button className={`store-art art-${product.tone}`} onClick={() => openProduct(product)} aria-label={`Lihat ${product.name}`}>
+      <span className="art-glow" /><span className="art-emblem">{product.icon}</span>
+      {product.hot && <span className="store-hot">HOT</span>}
+      <span className="store-game"><i>{product.icon.slice(0, 1)}</i>{product.game}</span>
+    </button>
+    <div className="store-status"><span className={product.status === 'BARU' ? 'status-new' : product.status === 'UPDATE' ? 'status-update' : ''}>{product.status}</span><span>GRATIS</span></div>
+    <span className="store-category">{product.category}</span>
+    <button className="store-product-name" onClick={() => openProduct(product)}>{product.name}</button>
+  </article>;
+
+  return <div className={`storefront ${light ? 'store-light' : ''}`}>
+    <header className="store-header"><div className="store-header-inner">
+      <a className="store-brand" href="#top"><span className="store-brand-mark"><Zap size={18} fill="currentColor" /></span><span>VALKRIE<span className="brand-969">X969</span></span></a>
+      <div className="store-header-actions">
+        <button className="store-icon-btn" aria-label="Notifikasi" onClick={() => setToast('Belum ada notifikasi baru.')}><Bell size={18} /></button>
+        <button className="store-icon-btn" aria-label="Ganti tema" onClick={toggleTheme}>{light ? <Moon size={18} /> : <Sun size={18} />}</button>
+        <button className="store-icon-btn menu-toggle" aria-label="Menu" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}><Menu size={20} /></button>
+      </div>
+      {menuOpen && <nav className="store-menu"><a href="#products" onClick={() => setMenuOpen(false)}>Semua produk</a><a href="#quick-links" onClick={() => setMenuOpen(false)}>Layanan</a><a href="#footer" onClick={() => setMenuOpen(false)}>Tentang</a></nav>}
+    </div></header>
+    <main id="top" className="store-main">
+      <nav className="store-categories" aria-label="Kategori produk">{categories.map((name) => <button key={name} className={`category-chip ${category === name ? 'active' : ''}`} onClick={() => setCategory(name)}>{name}<small>{categoryCount(name)}</small></button>)}</nav>
+      <form className="store-search" onSubmit={(event) => event.preventDefault()}><Search size={18} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Cari produk atau kategori..." aria-label="Cari produk atau kategori" /><button aria-label="Cari"><Search size={18} /></button></form>
+      <section className="store-hero" aria-labelledby="store-title"><div className="hero-noise" /><div className="store-hero-copy"><span className="store-open"><i /> BUKA 24 JAM</span><h1 id="store-title">Valkrie<span>X969</span></h1><p>Pusat tools dan koleksi digital game favoritmu.</p><small>Penyedia license otomatis · pilihan gratis tersedia</small><a href="#products" className="store-hero-button">Jelajahi koleksi <ChevronRight size={16} /></a></div><div className="hero-emblem" aria-hidden="true"><Gamepad2 size={78} /></div></section>
+      <section className="store-stats" aria-label="Statistik toko"><article><b>98</b><span>Mod tersedia</span></article><article><b>7</b><span>Game</span></article><article><b>100%</b><span>Gratis</span></article></section>
+      <section className="store-quick" id="quick-links"><h2 className="store-section-title">Akses <em>cepat</em></h2><div className="quick-grid">
+        <a href="#products" className="quick-link quick-hero" onPointerDown={quickRipple}><span className="quick-icon icon-catalog"><Gamepad2 size={21} /></span><span className="quick-copy"><b>Semua Mod</b><small>98+ Mods Available</small></span><span className="quick-label">EXPLORE</span><ChevronRight className="quick-arrow" size={17} /><span className="quick-orbit" aria-hidden="true" /></a>
+        <button className="quick-link quick-half quick-request" onPointerDown={quickRipple} onClick={() => setToast('Fitur request akan segera tersedia.')}><span className="quick-icon icon-request"><CircleHelp size={20} /></span><span className="quick-copy"><b>Request Mod</b><small>Request your favorite mod</small></span><ChevronRight className="quick-arrow" size={16} /></button>
+        <a className="quick-link quick-half quick-support" href="https://wa.me/" target="_blank" rel="noreferrer" onPointerDown={quickRipple}><span className="quick-icon icon-admin"><Headphones size={20} /></span><span className="quick-copy"><b>Chat Admin</b><small>Help &amp; Support</small></span><ChevronRight className="quick-arrow" size={16} /></a>
+        <a className="quick-link quick-wide quick-updates" href={channelUrl} target="_blank" rel="noreferrer" onPointerDown={quickRipple}><span className="quick-icon icon-updates"><Bell size={20} /></span><span className="quick-copy"><b>Saluran Update</b><small>Latest mod info</small></span><span className="quick-label">JOIN CHANNEL</span><ChevronRight className="quick-arrow" size={16} /></a>
+      </div></section>
+      {recentlyViewed.length > 0 && <section className="store-section"><h2 className="store-section-title">Terakhir <em>dibuka</em></h2><div className="recent-list">{recentlyViewed.map((product) => <button className={`recent-item art-${product.tone}`} key={product.id} onClick={() => openProduct(product)}><span>{product.icon}</span><b>{product.name}</b></button>)}</div></section>}
+      <section className="store-section"><h2 className="store-section-title">Produk <em>terlaris</em></h2><div className="best-list">{products.slice(0, 5).map((product, index) => card(product, index, true))}</div></section>
+      <section className="store-section" id="products"><div className="store-section-heading"><h2 className="store-section-title">Semua <em>produk</em></h2><span>{filtered.length} item</span></div>{filtered.length ? <div className="store-grid">{filtered.map((product, index) => card(product, index))}</div> : <div className="store-empty">Belum ada produk untuk filter ini.</div>}</section>
+      <footer id="footer" className="store-footer"><a href="#top">VALKRIE X969</a><span>Valkrie Tools · koleksi digital game</span><a href="#top">Kembali ke atas ↑</a></footer>
+    </main>
+    <nav className="bottom-nav" aria-label="Navigasi utama">
+      <button className={activeNav === 'home' ? 'active' : ''} aria-current={activeNav === 'home' ? 'page' : undefined} onClick={() => navigateTo('top', 'home')}><House size={19} /><span>Beranda</span></button>
+      <button className={activeNav === 'products' ? 'active' : ''} aria-current={activeNav === 'products' ? 'page' : undefined} onClick={() => navigateTo('products', 'products')}><Search size={19} /><span>Produk</span></button>
+      <button className={activeNav === 'favorites' ? 'active' : ''} aria-current={activeNav === 'favorites' ? 'page' : undefined} onClick={() => navigateTo('products', 'favorites')}><Heart size={19} /><span>Favorit</span></button>
+      <button className={activeNav === 'profile' ? 'active' : ''} aria-current={activeNav === 'profile' ? 'page' : undefined} onClick={() => navigateTo('profile', 'profile')}><UserRound size={19} /><span>Profil</span></button>
+    </nav>
+    {profileOpen && <div className="profile-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) { setProfileOpen(false); setActiveNav('home'); } }}>
+      <section className="profile-sheet" role="dialog" aria-modal="true" aria-labelledby="profile-title">
+        <header className="profile-heading"><div><span className="profile-kicker">VALKRIE TOOLS</span><h2 id="profile-title">Profil kamu</h2></div><button className="profile-close" aria-label="Tutup profil" onClick={() => { setProfileOpen(false); setActiveNav('home'); }}><X size={19} /></button></header>
+        <div className="profile-account"><span className="profile-avatar"><UserRound size={25} /></span><span className="profile-account-copy"><small>AKUN PENGUNJUNG</small><b>Halo, Player!</b><span>Login belum tersedia</span></span><span className="member-badge">MEMBER</span></div>
+        <div className="profile-id-row"><span>ID Pengguna</span><b>Dibuat setelah login</b></div>
+        <section className="membership-block"><div className="profile-section-head"><h3>Membership</h3><span>Status saat ini</span></div><article className="member-plan"><div className="plan-icon"><Gamepad2 size={18} /></div><div><b>Member</b><small>Akses koleksi gratis dan simpan favorit di perangkat ini.</small></div><span className="plan-active">AKTIF</span></article><article className="vip-plan"><div className="plan-icon"><Crown size={18} /></div><div className="vip-copy"><b>VIP</b><small>Akses khusus dan benefit VIP akan ditampilkan di sini.</small></div><span className="vip-coming"><LockKeyhole size={12} /> SEGERA</span></article></section>
+        <section className="profile-shortcuts"><div className="profile-section-head"><h3>Aktivitas kamu</h3></div><button onClick={() => { setProfileOpen(false); navigateTo('products', 'favorites'); }}><Heart size={17} /><span><b>Produk favorit</b><small>{favorites.length} produk tersimpan</small></span><ChevronRight size={16} /></button><button onClick={() => { setProfileOpen(false); navigateTo('products', 'products'); }}><Clock3 size={17} /><span><b>Terakhir dibuka</b><small>{recentlyViewed.length} produk dilihat</small></span><ChevronRight size={16} /></button><button onClick={() => { setProfileOpen(false); navigateTo('quick-links', 'home'); }}><Bookmark size={17} /><span><b>Bantuan & update</b><small>Kontak admin dan saluran informasi</small></span><ChevronRight size={16} /></button></section>
+        <button className="profile-login" onClick={() => setToast('Login Google akan tersedia setelah sistem akun diaktifkan.')}><UserRound size={17} /> Login Google <span>SEGERA</span></button>
+        <p className="profile-note">ID pengguna dan role VIP bisa dikelola admin setelah login dan database diaktifkan. Favorit saat ini tersimpan di browser ini.</p>
+      </section>
+    </div>}
+    <div className="store-fab"><button aria-label={muted ? 'Suara mati' : 'Matikan suara'} onClick={() => { setMuted(!muted); setToast(muted ? 'Suara dinyalakan.' : 'Suara dimatikan.'); }}>{muted ? <VolumeX size={18} /> : <Volume2 size={18} />}</button><button aria-label="Pengaturan" onClick={toggleTheme}><Settings2 size={18} /></button><a aria-label="Customer service" href="https://wa.me/" target="_blank" rel="noreferrer"><Headphones size={18} /></a></div>
+    {toast && <div className="store-toast" role="status">{toast}</div>}
+  </div>;
+}
