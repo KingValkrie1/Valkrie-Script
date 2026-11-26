@@ -1,19 +1,42 @@
-# Valkrie-Tools
+# Valkrie Tools
 
-Katalog tools digital dengan Next.js 14 App Router, TypeScript, Tailwind CSS, shadcn-style UI primitives, Radix UI, dan lucide-react.
+Website katalog ValkrieX969. Dibuat dengan Next.js 14, TypeScript, dan Tailwind CSS.
 
-## Menjalankan project
+## Peta folder
+
+```text
+app/                 Halaman dan gaya utama website
+components/          Bagian tampilan, seperti header, menu, dan kartu
+data/products.ts     Daftar produk dan kategori
+public/              Gambar atau aset statis (jika ditambahkan)
+```
+
+## Mengubah isi website
+
+- **Tambah atau ubah produk:** edit `data/products.ts`. Ikuti bentuk objek produk yang sudah ada. `id` harus unik; `category` harus sama dengan salah satu kategori yang tersedia.
+- **Ubah kategori:** edit daftar `categories` di `data/products.ts`.
+- **Ubah teks, layanan cepat, profil, navigasi, dan interaksi:** edit `components/Storefront.tsx`.
+- **Ubah tampilan dan warna:** edit `app/globals.css`.
+- **Ubah judul tab dan deskripsi website:** edit `app/layout.tsx`.
+- **Halaman tambahan:** letakkan di dalam folder `app/`, misalnya `app/tentang/page.tsx` untuk alamat `/tentang`.
+
+## Preview di komputer
+
+Jalankan perintah dari folder `Valkrie-Tools`:
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-Buka `http://localhost:3000`. Filter kategori ada di homepage dan tersimpan pada query `?cat=`. Fungsi setiap tool masih berupa placeholder untuk dilengkapi.
+Lalu buka `http://localhost:3000`. Simpan file untuk melihat perubahan; hentikan server dengan `Ctrl+C`.
 
-## Perintah
+## Simpan perubahan ke GitHub
 
-- `pnpm tsc --noEmit` — cek TypeScript
-- `pnpm build` — build production
+Commit perubahan ke branch `main` di folder `Valkrie-Tools`. Jika project Vercel terhubung ke repo dan branch tersebut, Vercel akan membuat deployment baru setelah perubahan masuk.
 
-Valkrie-Tools · Developer Dika
+## Perintah yang tersedia
+
+- `pnpm dev` — jalankan preview lokal
+- `pnpm tsc` — periksa tipe TypeScript
+- `pnpm build` — buat build production
