@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { AdminRequests, type AdminRequestItem } from '@/components/admin/AdminRequests';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
@@ -17,5 +18,5 @@ export default async function AdminPage() {
   const { data: authors } = ids.length ? await supabase.from('public_profiles').select('id,user_id,display_name').in('id', ids) : { data: [] };
   const authorMap = new Map((authors || []).map((author) => [author.id, author]));
   const requests: AdminRequestItem[] = (rows || []).map((row) => ({ ...row, author_user_id: authorMap.get(row.user_id)?.user_id || '', author_name: authorMap.get(row.user_id)?.display_name || 'Pengguna' })) as AdminRequestItem[];
-  return <main className="admin-page"><header className="request-top"><span>VALKRIE TOOLS · ADMIN</span><span>{user.email}</span></header><section className="admin-header"><span className="request-kicker">DASHBOARD</span><h1>Request masuk</h1><p>Balas, ubah status, pin, atau sembunyikan pengajuan.</p></section><AdminRequests initialRequests={requests} /></main>;
+  return <main className="admin-page"><header className="request-top"><span>VALKRIE TOOLS · ADMIN</span><span>{user.email}</span></header><section className="admin-header"><span className="request-kicker">DASHBOARD</span><h1>Request masuk</h1><p>Balas, ubah status, pin, atau sembunyikan pengajuan.</p><Link className="admin-vip-link" href="/admin/vip">Kelola VIP via User ID →</Link></section><AdminRequests initialRequests={requests} /></main>;
 }

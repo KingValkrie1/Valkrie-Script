@@ -327,20 +327,22 @@ returns trigger language plpgsql security definer set search_path = '' as $$
 declare
   recorded_action text;
   duration_left integer;
+  change_note text;
 begin
   if old.membership_tier is distinct from new.membership_tier
      or old.vip_expires_at is distinct from new.vip_expires_at
      or old.vip_permanent is distinct from new.vip_permanent then
     recorded_action := case
-      when new.membership_tier = 'vip' and old.membership_tier = 'vip' then 'extended'
+      when new.membership_tier = 'vip' and old.membership_tier = 'vip' and (old.vip_permanent or old.vip_expires_at > now()) then 'extended'
       when new.membership_tier = 'vip' then 'granted'
       else 'revoked'
     end;
     duration_left := case when new.vip_expires_at is null then null else greatest(0, ceil(extract(epoch from (new.vip_expires_at - now())) / 86400)::integer) end;
-    insert into public.vip_history (user_id, changed_by, action, duration_days, permanent)
-    values (new.id, auth.uid(), recorded_action, duration_left, new.vip_permanent);
+    change_note := nullif(current_setting('app.vip_note', true), '');
+    insert into public.vip_history (user_id, changed_by, action, duration_days, permanent, note)
+    values (new.id, auth.uid(), recorded_action, duration_left, new.vip_permanent, change_note);
     insert into public.admin_activity (admin_id, action, target_type, target_id, details)
-    values (auth.uid(), 'vip.' || recorded_action, 'user', new.user_id, jsonb_build_object('duration_days', duration_left, 'permanent', new.vip_permanent));
+    values (auth.uid(), 'vip.' || recorded_action, 'user', new.user_id, jsonb_build_object('duration_days', duration_left, 'permanent', new.vip_permanent, 'note', change_note));
   end if;
 
   if old.role is distinct from new.role then
@@ -353,6 +355,57 @@ $$;
 
 create trigger profiles_audit_admin_changes after update on public.profiles
   for each row execute function private.audit_profile_changes();
+
+create or replace function public.admin_manage_vip(
+  target_user_id text,
+  operation text,
+  duration_days integer default null,
+  permanent boolean default false,
+  note text default null
+)
+returns table (id uuid, user_id text, username text, display_name text, membership_tier public.membership_tier, vip_expires_at timestamptz, vip_permanent boolean)
+language plpgsql security definer set search_path = '' as $$
+declare
+  target_profile public.profiles%rowtype;
+  expiry_base timestamptz;
+begin
+  if not private.is_admin() then raise exception 'Admin access required'; end if;
+  if target_user_id is null or char_length(target_user_id) > 32 then raise exception 'Invalid user ID'; end if;
+  if note is not null and char_length(note) > 500 then raise exception 'Note is too long'; end if;
+
+  select p.* into target_profile from public.profiles p where upper(p.user_id) = upper(target_user_id) for update;
+  if not found then raise exception 'User ID not found'; end if;
+
+  if operation = 'revoke' then
+    if target_profile.membership_tier <> 'vip' then raise exception 'User does not have VIP'; end if;
+    perform set_config('app.vip_note', coalesce(trim(note), ''), true);
+    update public.profiles p set membership_tier = 'ordinary', vip_expires_at = null, vip_permanent = false where p.id = target_profile.id;
+  elsif operation in ('grant', 'extend') then
+    if not permanent and (duration_days is null or duration_days not in (7, 30, 365)) then raise exception 'Choose 7, 30, or 365 days'; end if;
+    if operation = 'grant' and private.is_vip(target_profile.id) then raise exception 'User already has active VIP; use extend'; end if;
+    if operation = 'extend' and not private.is_vip(target_profile.id) then raise exception 'User has no active VIP to extend'; end if;
+    if operation = 'extend' and target_profile.vip_permanent then raise exception 'Permanent VIP cannot be extended'; end if;
+
+    expiry_base := case
+      when operation = 'extend' then greatest(coalesce(target_profile.vip_expires_at, now()), now())
+      else now()
+    end;
+    perform set_config('app.vip_note', coalesce(trim(note), ''), true);
+    update public.profiles p
+      set membership_tier = 'vip',
+          vip_permanent = permanent,
+          vip_expires_at = case when permanent then null else expiry_base + make_interval(days => duration_days) end
+      where p.id = target_profile.id;
+  else
+    raise exception 'Invalid VIP operation';
+  end if;
+
+  return query select p.id, p.user_id, p.username, p.display_name, p.membership_tier, p.vip_expires_at, p.vip_permanent
+    from public.profiles p where p.id = target_profile.id;
+end;
+$$;
+revoke all on function public.admin_manage_vip(text, text, integer, boolean, text) from public, anon;
+grant execute on function public.admin_manage_vip(text, text, integer, boolean, text) to authenticated;
 
 alter table public.profiles enable row level security;
 alter table public.tools enable row level security;
