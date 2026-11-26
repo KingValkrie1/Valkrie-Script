@@ -453,7 +453,7 @@ create policy requests_delete_owner_before_reply_or_admin on public.tool_request
   using ((user_id = (select auth.uid()) and admin_reply is null) or (select private.is_admin()));
 
 create policy votes_read_visible_requests on public.request_votes for select to anon, authenticated using (
-  exists (select 1 from public.tool_requests r where r.id = request_id and not r.hidden)
+  exists (select 1 from public.tool_requests r where r.id = request_id and (not r.hidden or (select private.is_admin())))
 );
 create policy votes_add_once on public.request_votes for insert to authenticated with check (
   user_id = (select auth.uid())
@@ -461,7 +461,7 @@ create policy votes_add_once on public.request_votes for insert to authenticated
 );
 
 create policy comments_read_visible_requests on public.request_comments for select to anon, authenticated using (
-  exists (select 1 from public.tool_requests r where r.id = request_id and not r.hidden)
+  exists (select 1 from public.tool_requests r where r.id = request_id and (not r.hidden or (select private.is_admin())))
 );
 create policy comments_add_self on public.request_comments for insert to authenticated with check (
   user_id = (select auth.uid())

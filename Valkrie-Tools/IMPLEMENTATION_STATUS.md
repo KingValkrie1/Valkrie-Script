@@ -1,6 +1,6 @@
 # Status pengerjaan Valkrie Tools
 
-Fitur akan dikerjakan bertahap sesuai waktu yang tersedia. Kode tahap awal ada di branch lokal `feature/platform-foundation` dan belum dipush atau dideploy.
+Fitur dikerjakan bertahap sesuai waktu yang tersedia. Kode tahap awal ada di branch `feature/platform-foundation`; preview Vercel dipakai untuk melihat perubahan tanpa mengubah website utama.
 
 ## Sudah disiapkan di workspace
 
@@ -11,20 +11,19 @@ Fitur akan dikerjakan bertahap sesuai waktu yang tersedia. Kode tahap awal ada d
 - RLS awal: kolom admin/VIP terlindungi; email tidak tersedia di profil publik; kota hanya ditampilkan untuk VIP aktif.
 - Panel request admin awal: ubah status, balas publik, alasan penolakan, pin, dan sembunyikan request.
 - Kelola VIP via User ID: preview akun, grant/perpanjang/cabut, durasi, catatan, dan audit history.
+- Export CSV admin: filter status/bulan, pilih kolom, hitung vote, dan riwayat export.
 - `.env.example` dan petunjuk setup awal di README.
 
 ## Belum dikerjakan atau belum tersambung
 
 - Belum ada project Supabase milik pengguna, jadi database, email, login, dan role admin belum dapat dicoba.
 - Migration belum dijalankan atau diverifikasi terhadap project nyata.
-- Belum ada upload avatar, halaman katalog dari database, export CSV, notifikasi, bulk action, dan fitur lainnya.
-- Belum ada preview deployment untuk branch ini.
+- Belum ada upload avatar, halaman katalog dari database, notifikasi email, bulk action, dan fitur lainnya.
+- Project Supabase belum dibuat, jadi alur database masih berupa fondasi kode dan belum bisa digunakan langsung.
 
 ## Langkah kecil berikutnya
 
-1. Rapikan dan verifikasi migration/Auth foundation.
-2. Buat project Supabase dan masukkan konfigurasi sendiri lewat environment variables.
-3. Tambahkan avatar upload dan selesaikan alur profil.
-4. Bangun papan request publik beserta form dan vote.
-5. Selesaikan panel admin, termasuk kelola user/VIP via ID.
-6. Lanjutkan export, notifikasi, dan polish.
+1. Buat project Supabase dan masukkan konfigurasi sendiri lewat environment variables.
+2. Tambahkan avatar upload dan selesaikan alur profil.
+3. Selesaikan katalog tools dan halaman detail.
+4. Lanjutkan notifikasi email, bulk action, favorit, preferensi, dan polish.
