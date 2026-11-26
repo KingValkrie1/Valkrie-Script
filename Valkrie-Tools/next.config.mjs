@@ -1,3 +1,4 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = { output: 'export' };
+// Keep the Next.js server runtime enabled for auth callbacks and API routes.
+const nextConfig = {};
 export default nextConfig;
