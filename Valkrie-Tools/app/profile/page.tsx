@@ -31,7 +31,8 @@ export default async function ProfilePage() {
         {profile.bio && <div><dt>Bio</dt><dd>{profile.bio}</dd></div>}
       </dl>
       <EditProfileForm displayName={profile.display_name} bio={profile.bio} city={profile.city} canSetCity={Boolean(vipActive)} />
-      <p className="auth-setup-note">Avatar upload dan preferensi akun menyusul. Favorit saat ini tetap tersimpan di browser ini.</p>
+      <Link href={`/u/${profile.username}`} className="profile-home-link">Lihat profil publik →</Link>
+      <p className="auth-setup-note">Favorit katalog saat ini masih tersimpan di browser ini.</p>
       <SignOutButton />
       <Link href="/" className="profile-home-link">Kembali ke katalog</Link>
     </section>

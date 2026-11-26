@@ -1,0 +1,17 @@
+import Link from 'next/link';
+import { notFound } from 'next/navigation';
+import { createSupabaseServerClient } from '@/lib/supabase/server';
+
+export const dynamic = 'force-dynamic';
+
+export default async function PublicProfilePage({ params }: { params: { username: string } }) {
+  if (!/^[a-z0-9_]{3,24}$/.test(params.username)) notFound();
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) return <main className="request-page"><header className="request-top"><Link href="/" className="request-brand">← VALKRIE TOOLS</Link></header><div className="request-empty"><span>Profil belum tersedia</span><p>Hubungkan database untuk membuka profil publik.</p></div></main>;
+  const supabase = await createSupabaseServerClient();
+  const { data: profile } = await supabase.from('public_profiles').select('user_id,username,display_name,avatar_url,bio,city,role,membership_tier,joined_at').eq('username', params.username).maybeSingle();
+  if (!profile) notFound();
+  const { data: requests } = await supabase.from('public_request_board').select('id,request_number,name,category,description,status,vote_count,comment_count,created_at,updated_at').eq('author_username', profile.username).order('created_at', { ascending: false }).limit(100);
+  const vip = profile.membership_tier === 'vip';
+  const badge = profile.role === 'admin' ? 'ADMIN' : vip ? 'RAKYAT VIP' : 'RAKYAT BIASA';
+  return <main className="request-page public-profile-page"><header className="request-top"><Link href="/" className="request-brand">← VALKRIE TOOLS</Link><Link href="/requests">REQUEST BOARD</Link></header><section className="public-profile-card"><div className="public-avatar">{profile.avatar_url ? <img src={profile.avatar_url} alt="" /> : profile.display_name.slice(0, 1).toUpperCase()}</div><div className="public-profile-main"><span className="request-kicker">PROFIL PENGGUNA</span><h1>{profile.display_name}</h1><p>@{profile.username} · {profile.user_id}</p><span className={`profile-role role-${profile.role === 'admin' ? 'admin' : vip ? 'vip' : 'member'}`}>{badge}</span></div><div className="public-profile-meta"><span>Member sejak</span><b>{new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric' }).format(new Date(profile.joined_at))}</b>{profile.city && <><span>Kota request</span><b>{profile.city}</b></>}</div>{profile.bio && <p className="public-bio">{profile.bio}</p>}</section><section className="public-user-requests"><div className="request-board-heading"><div><span className="request-kicker">PAPAN REQUEST</span><h2>Request dari {profile.display_name}</h2></div><span>{(requests || []).length} request</span></div>{requests?.length ? <div className="request-list">{requests.map((item) => <Link href={`/requests/${item.id}`} className="request-card" key={item.id}><div className="request-card-meta"><span className={`request-status status-${item.status}`}>{({ pending: 'Menunggu', processing: 'Diproses', completed: 'Selesai', rejected: 'Ditolak', duplicate: 'Duplikat' } as Record<string, string>)[item.status] || item.status}</span><span>REQ-{item.request_number}</span><span>{item.vote_count} vote</span></div><h3>{item.name}</h3><p className="request-description">{item.description}</p><small>{new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(item.created_at))}</small></Link>)}</div> : <div className="request-empty"><span>Belum ada request publik</span><p>Request yang disembunyikan tidak ditampilkan di profil publik.</p></div>}</section></main>;
+}

@@ -13,6 +13,7 @@ Fitur dikerjakan bertahap sesuai waktu yang tersedia. Kode tahap awal ada di bra
 - Kelola VIP via User ID: preview akun, grant/perpanjang/cabut, durasi, catatan, dan audit history.
 - Export CSV admin: filter status/bulan, pilih kolom, hitung vote, dan riwayat export.
 - Aksi massal panel admin untuk memilih beberapa request lalu mengubah statusnya, dengan pencatatan audit per request.
+- Halaman profil publik `/u/[username]` menampilkan ID, badge, detail aman untuk publik, dan daftar request publik milik pengguna.
 - `.env.example` dan petunjuk setup awal di README.
 
 ## Belum dikerjakan atau belum tersambung
