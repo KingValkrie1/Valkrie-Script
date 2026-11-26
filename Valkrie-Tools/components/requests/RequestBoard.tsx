@@ -7,6 +7,7 @@ import { ArrowUp, Search, Send, SlidersHorizontal } from 'lucide-react';
 export type BoardRequest = {
   id: string;
   request_number: number;
+  author_uuid: string;
   author_user_id: string;
   author_username: string;
   author_name: string;
