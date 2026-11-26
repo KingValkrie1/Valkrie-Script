@@ -18,11 +18,11 @@ export default async function RequestDetailPage({ params }: { params: { id: stri
   if (!row) notFound();
 
   const ids = (commentRows || []).map((comment) => comment.user_id).filter((id, index, allIds) => allIds.indexOf(id) === index);
-  const { data: authors } = ids.length ? await supabase.from('public_profiles').select('id,user_id,display_name,role,membership_tier').in('id', ids) : { data: [] };
+  const { data: authors } = ids.length ? await supabase.from('public_profiles').select('id,user_id,username,display_name,role,membership_tier').in('id', ids) : { data: [] };
   const authorMap = new Map((authors || []).map((author) => [author.id, author]));
   const comments: PublicComment[] = (commentRows || []).map((comment) => {
     const author = authorMap.get(comment.user_id);
-    return { ...comment, author_name: author?.display_name || 'Pengguna', author_user_id: author?.user_id || '', author_role: author?.role || 'member', author_membership_tier: author?.membership_tier || 'ordinary' };
+    return { ...comment, author_name: author?.display_name || 'Pengguna', author_user_id: author?.user_id || '', author_username: author?.username || 'unknown', author_role: author?.role || 'member', author_membership_tier: author?.membership_tier || 'ordinary' };
   });
   let isBookmarked = false;
   if (user) {

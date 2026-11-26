@@ -7,7 +7,7 @@ import { ArrowUp, Copy, Send } from 'lucide-react';
 import { RequestBookmark } from '@/components/requests/RequestBookmark';
 import type { BoardRequest } from '@/components/requests/RequestBoard';
 
-export type PublicComment = { id: string; user_id: string; body: string; created_at: string; author_name: string; author_user_id: string; author_role: 'member' | 'admin'; author_membership_tier: 'ordinary' | 'vip' };
+export type PublicComment = { id: string; user_id: string; body: string; created_at: string; author_name: string; author_user_id: string; author_username: string; author_role: 'member' | 'admin'; author_membership_tier: 'ordinary' | 'vip' };
 const categories: Record<string, string> = { utility: 'Utility', web_tools: 'Web Tools', design_tools: 'Design Tools', developer_tools: 'Developer Tools', productivity: 'Productivity', other: 'Lainnya' };
 const statuses: Record<string, string> = { pending: 'Menunggu', processing: 'Diproses', completed: 'Selesai', rejected: 'Ditolak', duplicate: 'Duplikat' };
 
@@ -74,7 +74,7 @@ export function RequestDetail({ request, comments, loggedIn, viewerId }: { reque
     <article className="request-detail-card">
       <div className="request-card-meta"><span className={`request-status status-${request.status}`}>{statuses[request.status]}</span><span>{categories[request.category] || request.category}</span>{request.pinned && <span className="request-pin">PINNED</span>}<span className="request-number">REQ-{request.request_number}</span></div>
       <h1>{request.name}</h1>
-      <div className="request-detail-author"><b>{request.author_name}</b><span className={request.author_role === 'admin' ? 'author-admin' : request.author_membership_tier === 'vip' ? 'author-vip' : ''}>{request.author_role === 'admin' ? 'ADMIN' : request.author_membership_tier === 'vip' ? 'RAKYAT VIP' : 'RAKYAT BIASA'}</span><small>{request.author_user_id}{request.author_city ? ` · ${request.author_city}` : ''} · {new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(request.created_at))}</small></div>
+      <div className="request-detail-author"><Link href={`/u/${request.author_username}`}><b>{request.author_name}</b></Link><span className={request.author_role === 'admin' ? 'author-admin' : request.author_membership_tier === 'vip' ? 'author-vip' : ''}>{request.author_role === 'admin' ? 'ADMIN' : request.author_membership_tier === 'vip' ? 'RAKYAT VIP' : 'RAKYAT BIASA'}</span><small>{request.author_user_id}{request.author_city ? ` · ${request.author_city}` : ''} · {new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(request.created_at))}</small></div>
       <p className="request-detail-description">{request.description}</p>
       {request.tags?.length > 0 && <div className="request-tags">{request.tags.map((tag) => <span key={tag}>#{tag}</span>)}</div>}
       {request.reference_url && <a className="request-reference" href={request.reference_url} target="_blank" rel="noreferrer">Buka link referensi ↗</a>}
@@ -86,7 +86,7 @@ export function RequestDetail({ request, comments, loggedIn, viewerId }: { reque
     </article>
     <section className="request-comments"><div className="request-board-heading"><div><span className="request-kicker">DISKUSI PUBLIK</span><h2>Komentar</h2></div><span>{comments.length}</span></div>
       {loggedIn ? <form className="request-comment-form" onSubmit={sendComment}><textarea name="body" rows={3} maxLength={2000} placeholder="Tulis komentar yang membantu…" required /><button disabled={busy}><Send size={15} /> Kirim</button></form> : <p className="request-comment-login"><Link href="/login">Masuk</Link> untuk ikut berkomentar.</p>}
-      {comments.length ? <div className="request-comment-list">{comments.map((comment) => <article key={comment.id}><header><b>{comment.author_name}</b><span className={comment.author_role === 'admin' ? 'author-admin' : comment.author_membership_tier === 'vip' ? 'author-vip' : ''}>{comment.author_role === 'admin' ? 'ADMIN' : comment.author_membership_tier === 'vip' ? 'RAKYAT VIP' : 'RAKYAT BIASA'}</span><small>{comment.author_user_id}</small><time>{new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(comment.created_at))}</time></header><p>{comment.body}</p></article>)}</div> : <div className="request-empty"><span>Belum ada komentar</span><p>Mulai diskusi dengan tetap menjaga percakapan ramah dan relevan.</p></div>}
+      {comments.length ? <div className="request-comment-list">{comments.map((comment) => <article key={comment.id}><header><Link href={`/u/${comment.author_username}`}><b>{comment.author_name}</b></Link><span className={comment.author_role === 'admin' ? 'author-admin' : comment.author_membership_tier === 'vip' ? 'author-vip' : ''}>{comment.author_role === 'admin' ? 'ADMIN' : comment.author_membership_tier === 'vip' ? 'RAKYAT VIP' : 'RAKYAT BIASA'}</span><small>{comment.author_user_id}</small><time>{new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(comment.created_at))}</time></header><p>{comment.body}</p></article>)}</div> : <div className="request-empty"><span>Belum ada komentar</span><p>Mulai diskusi dengan tetap menjaga percakapan ramah dan relevan.</p></div>}
     </section>
   </main>;
 }

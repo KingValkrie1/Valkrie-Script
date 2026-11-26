@@ -56,7 +56,7 @@ Jangan masukkan nilai key asli ke repo. Email konfirmasi dan reset memakai penga
 
 ## Simpan perubahan ke GitHub
 
-Commit perubahan ke branch `main` di folder `Valkrie-Tools`. Jika project Vercel terhubung ke repo dan branch tersebut, Vercel akan membuat deployment baru setelah perubahan masuk. Set variabel `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_SITE_URL`, dan server-only `SUPABASE_SERVICE_ROLE_KEY` di Vercel.
+Kode website berada di folder `Valkrie-Tools` dalam repo GitHub `KingValkrie1/Valkrie-Script`. Pengerjaan dan preview saat ini memakai branch `feature/platform-foundation`; perubahan pada branch ini tidak mengubah production. Gunakan preview Vercel untuk melihat hasil. Jangan salin key ke repo; konfigurasi Supabase disimpan di Environment Variables Vercel setelah project Supabase tersedia.
 
 ## Perintah yang tersedia
 
