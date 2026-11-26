@@ -9,13 +9,14 @@ Fitur akan dikerjakan bertahap sesuai waktu yang tersedia. Kode tahap awal ada d
 - Edit nama tampilan dan bio; kota request hanya bisa disimpan oleh VIP aktif.
 - Migration PostgreSQL untuk User ID otomatis `VALK-000001`, profil, tier biasa/VIP, katalog tools, request, vote unik, komentar, bookmark, kuota request mingguan, dan log dasar.
 - RLS awal: kolom admin/VIP terlindungi; email tidak tersedia di profil publik; kota hanya ditampilkan untuk VIP aktif.
+- Panel request admin awal: ubah status, balas publik, alasan penolakan, pin, dan sembunyikan request.
 - `.env.example` dan petunjuk setup awal di README.
 
 ## Belum dikerjakan atau belum tersambung
 
 - Belum ada project Supabase milik pengguna, jadi database, email, login, dan role admin belum dapat dicoba.
 - Migration belum dijalankan atau diverifikasi terhadap project nyata.
-- Belum ada upload avatar, halaman katalog dari database, request board, komentar/vote UI, panel admin, kelola VIP via User ID, export CSV, notifikasi, dan fitur lainnya.
+- Belum ada upload avatar, halaman katalog dari database, kelola VIP via User ID, export CSV, notifikasi, bulk action, dan fitur lainnya.
 - Belum ada preview deployment untuk branch ini.
 
 ## Langkah kecil berikutnya
@@ -24,4 +25,5 @@ Fitur akan dikerjakan bertahap sesuai waktu yang tersedia. Kode tahap awal ada d
 2. Buat project Supabase dan masukkan konfigurasi sendiri lewat environment variables.
 3. Tambahkan avatar upload dan selesaikan alur profil.
 4. Bangun papan request publik beserta form dan vote.
-5. Lanjutkan admin, export, notifikasi, dan polish.
+5. Selesaikan panel admin, termasuk kelola user/VIP via ID.
+6. Lanjutkan export, notifikasi, dan polish.
