@@ -8,6 +8,7 @@ Fitur dikerjakan bertahap sesuai waktu yang tersedia. Kode tahap awal ada di bra
 - Halaman daftar, login email/username, lupa/reset password, callback verifikasi, logout semua perangkat, dan profil baca.
 - Edit nama tampilan dan bio; kota request hanya bisa disimpan oleh VIP aktif.
 - Migration PostgreSQL untuk User ID otomatis `VALK-000001`, profil, tier biasa/VIP, katalog tools, request, vote unik, komentar, bookmark, kuota request mingguan, dan log dasar.
+- Upload avatar profil dan lampiran request sudah memiliki alur kode serta migration/storage path; bucket dan policy tetap perlu diterapkan di project Supabase pemilik.
 - RLS awal: kolom admin/VIP terlindungi; email tidak tersedia di profil publik; kota hanya ditampilkan untuk VIP aktif.
 - Panel request admin awal: ubah status, balas publik, alasan penolakan, pin, dan sembunyikan request.
 - Kelola VIP via User ID: preview akun, grant/perpanjang/cabut, durasi, catatan, dan audit history.
@@ -19,18 +20,21 @@ Fitur dikerjakan bertahap sesuai waktu yang tersedia. Kode tahap awal ada di bra
 - Kartu beranda kini mengarah ke situs resmi beberapa tools legal dan pencarian/kategori disesuaikan dengan katalog produktivitas, desain, dan developer.
 - Halaman publik `/vip` menjelaskan manfaat, aturan yang tetap setara, dan cara status VIP dikelola admin.
 - Profil pribadi menampilkan riwayat 20 request terakhir beserta status balasan admin.
+- Katalog `/tools` membaca tools terbit dari tabel database saat Supabase tersedia, dengan katalog contoh yang diberi label saat konfigurasi belum tersedia.
+- Detail tool dapat dibuka dari slug katalog; admin mendapat CRUD katalog di `/admin/tools` dengan validasi URL HTTPS, kategori, status terbit, dan penanda akses VIP.
 - `.env.example` dan petunjuk setup awal di README.
 
 ## Belum dikerjakan atau belum tersambung
 
-- Belum ada project Supabase milik pengguna, jadi database, email, login, dan role admin belum dapat dicoba.
+- Belum ada project Supabase milik pengguna, jadi database, login, role admin, upload, dan pengiriman email belum dapat dicoba dengan data nyata.
 - Migration belum dijalankan atau diverifikasi terhadap project nyata.
-- Belum ada upload avatar, halaman katalog dari database, notifikasi email, dan fitur lainnya.
-- Project Supabase belum dibuat, jadi alur database masih berupa fondasi kode dan belum bisa digunakan langsung.
+- Katalog database dan CRUD admin masih menunggu konfigurasi Supabase serta migration di project pemilik.
+- Favorit tools yang tersimpan per akun dan UI preferensi notifikasi/tema/bahasa belum selesai; tabel preferensi dan bookmark tool sudah tersedia di migration awal.
+- Notifikasi email belum dihubungkan ke provider atau trigger yang aktif.
 
 ## Langkah kecil berikutnya
 
 1. Buat project Supabase dan masukkan konfigurasi sendiri lewat environment variables.
-2. Tambahkan avatar upload dan selesaikan alur profil.
-3. Selesaikan katalog tools dan halaman detail.
-4. Lanjutkan notifikasi email, bulk action, favorit, preferensi, dan polish.
+2. Selesaikan favorit tools per akun dan UI preferensi.
+3. Hubungkan notifikasi email setelah provider email tersedia.
+4. Lanjutkan polish dan audit akses setelah database dapat diuji.
