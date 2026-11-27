@@ -3,11 +3,17 @@ import { notFound } from 'next/navigation';
 import { RequestDetail, type PublicComment } from '@/components/requests/RequestDetail';
 import type { BoardRequest } from '@/components/requests/RequestBoard';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { previewCommentsByRequest, previewRequests } from '@/data/request-preview';
 
 export const dynamic = 'force-dynamic';
 
 export default async function RequestDetailPage({ params }: { params: { id: string } }) {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) return <main className="request-page"><header className="request-top"><Link href="/requests" className="request-brand">← REQUEST BOARD</Link><span>VALKRIE X969</span></header><div className="request-empty"><span>Database belum tersambung</span><p>Detail request akan tampil setelah database disiapkan.</p></div></main>;
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    const request = previewRequests.find((item) => item.id === params.id);
+    if (!request) notFound();
+    const comments = previewCommentsByRequest[request.id] || [];
+    return <RequestDetail request={request} comments={comments} loggedIn={false} viewerId={null} previewMode />;
+  }
 
   const supabase = await createSupabaseServerClient();
   const [{ data: row }, { data: commentRows }, { data: { user } }] = await Promise.all([

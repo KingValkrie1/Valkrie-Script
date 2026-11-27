@@ -38,7 +38,7 @@ const statusNames: Record<string, string> = {
   pending: 'Menunggu', processing: 'Diproses', completed: 'Selesai', rejected: 'Ditolak', duplicate: 'Duplikat',
 };
 
-export function RequestBoard({ initialRequests, loggedIn }: { initialRequests: BoardRequest[]; loggedIn: boolean }) {
+export function RequestBoard({ initialRequests, loggedIn, previewMode = false }: { initialRequests: BoardRequest[]; loggedIn: boolean; previewMode?: boolean }) {
   const [requests, setRequests] = useState(initialRequests);
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
@@ -55,6 +55,7 @@ export function RequestBoard({ initialRequests, loggedIn }: { initialRequests: B
 
   async function submitRequest(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true); setNotice('');
+    if (previewMode) { setNotice('Mode preview: request tidak disimpan karena database belum disambungkan.'); setBusy(false); return; }
     const values = Object.fromEntries(new FormData(event.currentTarget).entries());
     try {
       const response = await fetch('/api/requests', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(values) });
@@ -66,6 +67,7 @@ export function RequestBoard({ initialRequests, loggedIn }: { initialRequests: B
   }
 
   async function vote(id: string) {
+    if (previewMode) { setNotice('Mode preview: vote hanya contoh dan tidak disimpan.'); return; }
     if (!loggedIn) { window.location.assign('/login'); return; }
     setNotice('');
     try {
@@ -78,7 +80,7 @@ export function RequestBoard({ initialRequests, loggedIn }: { initialRequests: B
 
   return <main className="request-page">
     <header className="request-top"><Link href="/" className="request-brand">← <span>VALKRIE<span>X969</span></span></Link><span>REQUEST BOARD</span></header>
-    <section className="request-intro"><span className="request-kicker">PAPAN REQUEST PUBLIK</span><h1>Bangun tools <em>bareng.</em></h1><p>Ajukan ide, dukung request yang kamu butuhkan, dan pantau statusnya.</p><button className="request-submit-open" onClick={() => loggedIn ? setFormOpen(!formOpen) : window.location.assign('/login')}><Send size={16} /> Ajukan Tool</button></section>
+    <section className="request-intro"><span className="request-kicker">PAPAN REQUEST PUBLIK</span><h1>Bangun tools <em>bareng.</em></h1><p>Ajukan ide, dukung request yang kamu butuhkan, dan pantau statusnya.</p>{previewMode && <p className="preview-mode-banner">Preview tampilan · data contoh · belum tersimpan ke database</p>}<button className="request-submit-open" onClick={() => previewMode ? setFormOpen(!formOpen) : loggedIn ? setFormOpen(!formOpen) : window.location.assign('/login')}><Send size={16} /> Ajukan Tool</button></section>
     {formOpen && <form className="request-form" onSubmit={submitRequest}>
       <div className="request-form-head"><h2>Request tool baru</h2><button type="button" onClick={() => setFormOpen(false)}>Tutup</button></div>
       <label>Nama tool<input name="name" minLength={2} maxLength={120} placeholder="Contoh: PDF merge online" required /></label>

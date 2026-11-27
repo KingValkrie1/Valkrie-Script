@@ -11,7 +11,7 @@ export type PublicComment = { id: string; user_id: string; body: string; created
 const categories: Record<string, string> = { utility: 'Utility', web_tools: 'Web Tools', design_tools: 'Design Tools', developer_tools: 'Developer Tools', productivity: 'Productivity', other: 'Lainnya' };
 const statuses: Record<string, string> = { pending: 'Menunggu', processing: 'Diproses', completed: 'Selesai', rejected: 'Ditolak', duplicate: 'Duplikat' };
 
-export function RequestDetail({ request, comments, loggedIn, viewerId }: { request: BoardRequest; comments: PublicComment[]; loggedIn: boolean; viewerId: string | null }) {
+export function RequestDetail({ request, comments, loggedIn, viewerId, previewMode = false }: { request: BoardRequest; comments: PublicComment[]; loggedIn: boolean; viewerId: string | null; previewMode?: boolean }) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -55,6 +55,7 @@ export function RequestDetail({ request, comments, loggedIn, viewerId }: { reque
   }
 
   async function vote() {
+    if (previewMode) { setNotice('Mode preview: vote hanya contoh dan tidak disimpan.'); return; }
     if (!loggedIn) { window.location.assign('/login'); return; }
     try {
       const response = await fetch(`/api/requests/${request.id}/vote`, { method: 'POST' });
@@ -80,12 +81,13 @@ export function RequestDetail({ request, comments, loggedIn, viewerId }: { reque
       {request.reference_url && <a className="request-reference" href={request.reference_url} target="_blank" rel="noreferrer">Buka link referensi ↗</a>}
       {request.admin_reply && <div className="request-admin-reply"><b>Balasan admin</b><p>{request.admin_reply}</p></div>}
       {request.rejection_reason && <div className="request-rejection"><b>Alasan penolakan</b><p>{request.rejection_reason}</p></div>}
-      <div className="request-detail-actions"><button className="request-vote" onClick={vote}><ArrowUp size={17} /><span>{request.vote_count}</span><small>Vote</small></button><RequestBookmark requestId={request.id} initialSaved={request.is_bookmarked || false} loggedIn={loggedIn} /><button className="request-share" onClick={copyLink}><Copy size={15} /> Salin link</button>{canEdit && <><button className="request-share" onClick={() => setEditing(!editing)}>{editing ? 'Tutup edit' : 'Edit request'}</button><button className="request-delete" disabled={busy} onClick={deleteRequest}>Hapus</button></>}</div>
+      {previewMode && <p className="preview-mode-banner">Preview tampilan · data contoh · tindakan tidak disimpan ke database</p>}
+      <div className="request-detail-actions"><button className="request-vote" onClick={vote}><ArrowUp size={17} /><span>{request.vote_count}</span><small>Vote</small></button><RequestBookmark requestId={request.id} initialSaved={request.is_bookmarked || false} loggedIn={loggedIn} previewMode={previewMode} /><button className="request-share" onClick={copyLink}><Copy size={15} /> Salin link</button>{canEdit && <><button className="request-share" onClick={() => setEditing(!editing)}>{editing ? 'Tutup edit' : 'Edit request'}</button><button className="request-delete" disabled={busy} onClick={deleteRequest}>Hapus</button></>}</div>
       {notice && <p className="request-notice" role="status">{notice}</p>}
       {editing && <form className="request-form request-edit-form" onSubmit={saveEdit}><h2>Edit request</h2><label>Nama tool<input name="name" defaultValue={request.name} minLength={2} maxLength={120} required /></label><label>Kategori<select name="category" defaultValue={request.category}>{Object.entries(categories).map(([key, label]) => <option key={key} value={key}>{label}</option>)}</select></label><label>Deskripsi<textarea name="description" defaultValue={request.description} minLength={10} maxLength={5000} rows={4} required /></label><label>Link referensi<input name="referenceUrl" type="url" defaultValue={request.reference_url || ''} /></label><button className="request-submit-open" disabled={busy}>{busy ? 'Menyimpan…' : 'Simpan perubahan'}</button></form>}
     </article>
     <section className="request-comments"><div className="request-board-heading"><div><span className="request-kicker">DISKUSI PUBLIK</span><h2>Komentar</h2></div><span>{comments.length}</span></div>
-      {loggedIn ? <form className="request-comment-form" onSubmit={sendComment}><textarea name="body" rows={3} maxLength={2000} placeholder="Tulis komentar yang membantu…" required /><button disabled={busy}><Send size={15} /> Kirim</button></form> : <p className="request-comment-login"><Link href="/login">Masuk</Link> untuk ikut berkomentar.</p>}
+      {loggedIn ? <form className="request-comment-form" onSubmit={sendComment}><textarea name="body" rows={3} maxLength={2000} placeholder="Tulis komentar yang membantu…" required /><button disabled={busy}><Send size={15} /> Kirim</button></form> : <p className="request-comment-login">{previewMode ? 'Komentar hanya contoh; login dan database belum diaktifkan.' : <><Link href="/login">Masuk</Link> untuk ikut berkomentar.</>}</p>}
       {comments.length ? <div className="request-comment-list">{comments.map((comment) => <article key={comment.id}><header><Link href={`/u/${comment.author_username}`}><b>{comment.author_name}</b></Link><span className={comment.author_role === 'admin' ? 'author-admin' : comment.author_membership_tier === 'vip' ? 'author-vip' : ''}>{comment.author_role === 'admin' ? 'ADMIN' : comment.author_membership_tier === 'vip' ? 'RAKYAT VIP' : 'RAKYAT BIASA'}</span><small>{comment.author_user_id}</small><time>{new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(comment.created_at))}</time></header><p>{comment.body}</p></article>)}</div> : <div className="request-empty"><span>Belum ada komentar</span><p>Mulai diskusi dengan tetap menjaga percakapan ramah dan relevan.</p></div>}
     </section>
   </main>;

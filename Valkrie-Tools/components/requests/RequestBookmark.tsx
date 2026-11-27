@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Bookmark } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-export function RequestBookmark({ requestId, initialSaved, loggedIn }: { requestId: string; initialSaved: boolean; loggedIn: boolean }) {
+export function RequestBookmark({ requestId, initialSaved, loggedIn, previewMode = false }: { requestId: string; initialSaved: boolean; loggedIn: boolean; previewMode?: boolean }) {
   const [saved, setSaved] = useState(initialSaved);
   const [busy, setBusy] = useState(false);
   const router = useRouter();
@@ -19,5 +19,5 @@ export function RequestBookmark({ requestId, initialSaved, loggedIn }: { request
     } catch (error) { window.alert(error instanceof Error ? error.message : 'Favorit belum tersimpan.'); }
     finally { setBusy(false); }
   }
-  return <button className={`request-share request-bookmark${saved ? ' saved' : ''}`} type="button" aria-pressed={saved} disabled={busy} onClick={toggle}><Bookmark size={15} /> {saved ? 'Tersimpan' : 'Simpan'}</button>;
+  return <button className={`request-share request-bookmark${saved ? ' saved' : ''}`} type="button" aria-pressed={saved} disabled={busy || previewMode} title={previewMode ? 'Bookmark aktif setelah database disambungkan' : undefined} onClick={toggle}><Bookmark size={15} /> {saved ? 'Tersimpan' : 'Simpan'}</button>;
 }
