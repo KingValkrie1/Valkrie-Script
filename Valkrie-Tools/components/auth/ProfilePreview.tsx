@@ -2,93 +2,115 @@
 
 import Link from 'next/link';
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
-import { ArrowRight, Camera, Clock3, Heart, Settings2, ShieldCheck, UserRound } from 'lucide-react';
+import { ArrowRight, Camera, Check, ChevronDown, Copy, Gift, HelpCircle, LockKeyhole, Moon, Pencil, Settings2, Sun, UserRound, X } from 'lucide-react';
 import styles from './ProfilePreview.module.css';
 
 const storageKey = 'valkrie-profile-preview';
+const userId = '12345678';
 
 export function ProfilePreview() {
-  const [displayName, setDisplayName] = useState('Nama kamu');
+  const [username, setUsername] = useState('Username');
   const [bio, setBio] = useState('');
   const [avatar, setAvatar] = useState('');
-  const [message, setMessage] = useState('');
+  const [banner, setBanner] = useState('');
+  const [code, setCode] = useState('');
+  const [notice, setNotice] = useState('');
+  const [claimed, setClaimed] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [light, setLight] = useState(false);
 
   useEffect(() => {
     try {
       const saved = localStorage.getItem(storageKey);
-      if (!saved) return;
-      const preview = JSON.parse(saved) as { displayName?: string; bio?: string };
-      if (preview.displayName) setDisplayName(preview.displayName);
-      if (typeof preview.bio === 'string') setBio(preview.bio);
-    } catch { /* Keep the blank preview when browser storage is unavailable. */ }
+      if (saved) {
+        const profile = JSON.parse(saved) as { username?: string; bio?: string };
+        if (profile.username) setUsername(profile.username);
+        if (typeof profile.bio === 'string') setBio(profile.bio);
+      }
+      setLight(localStorage.getItem('valkrie-theme') === 'light');
+    } catch { /* Keep preview defaults when browser storage is unavailable. */ }
   }, []);
 
-  function chooseAvatar(event: ChangeEvent<HTMLInputElement>) {
+  function chooseImage(event: ChangeEvent<HTMLInputElement>, target: 'avatar' | 'banner') {
     const file = event.target.files?.[0];
     if (!file) return;
     if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024) {
-      setMessage('Pilih JPG, PNG, atau WebP maksimal 5 MB.');
+      setNotice('Pilih JPG, PNG, atau WebP maksimal 5 MB. Gambar hanya pratinjau di perangkat ini.');
       event.target.value = '';
       return;
     }
-    setAvatar(URL.createObjectURL(file));
-    setMessage('Avatar hanya pratinjau di halaman ini; belum diunggah.');
+    const preview = URL.createObjectURL(file);
+    if (target === 'avatar') setAvatar(preview);
+    else setBanner(preview);
+    setNotice('Gambar hanya tampil sebagai pratinjau; belum disimpan ke akun.');
   }
 
-  function savePreview(event: FormEvent<HTMLFormElement>) {
+  function saveProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     try {
-      localStorage.setItem(storageKey, JSON.stringify({ displayName: displayName.trim(), bio: bio.trim() }));
-      setDisplayName(displayName.trim() || 'Nama kamu');
+      localStorage.setItem(storageKey, JSON.stringify({ username: username.trim() || 'Username', bio: bio.trim() }));
+      setUsername(username.trim() || 'Username');
       setBio(bio.trim());
-      setMessage('Pratinjau profil disimpan di browser ini saja.');
-    } catch {
-      setMessage('Browser tidak dapat menyimpan pratinjau ini.');
-    }
+      setEditing(false);
+      setNotice('Pratinjau profil disimpan di browser ini saja.');
+    } catch { setNotice('Browser tidak dapat menyimpan pratinjau ini.'); }
   }
 
-  return <main className={styles.page}>
-    <header className={styles.header}><Link href="/" className={styles.brand}><span>V</span> VALKRIE<span>X969</span></Link><Link href="/login" className={styles.signIn}>Masuk / daftar <ArrowRight size={15} /></Link></header>
-    <section className={styles.previewBanner}><span>MODE PREVIEW</span><p>Ini rancangan profil untuk ditinjau. Belum terhubung ke akun atau database.</p></section>
+  async function copyId() {
+    try { await navigator.clipboard.writeText(userId); setNotice('ID contoh disalin.'); }
+    catch { setNotice(`ID contoh: ${userId}`); }
+  }
 
-    <section className={styles.profileHero}>
-      <div className={styles.avatar}>{avatar ? <img src={avatar} alt="Pratinjau avatar profil" /> : <UserRound size={35} />}</div>
-      <div className={styles.identity}><span className={styles.kicker}>PROFIL VALKRIE TOOLS</span><h1>{displayName}</h1><p>@username-kamu <span>·</span> status contoh</p><div className={styles.badges}><span className={styles.memberBadge}>RAKYAT BIASA · CONTOH</span><span className={styles.roleBadge}>AKUN PREVIEW</span></div></div>
-      <label className={styles.avatarUpload}><Camera size={15} /> Pilih avatar<input type="file" accept="image/jpeg,image/png,image/webp" onChange={chooseAvatar} /></label>
-    </section>
+  function toggleTheme() {
+    const next = !light;
+    setLight(next);
+    document.documentElement.dataset.theme = next ? 'light' : 'dark';
+    localStorage.setItem('valkrie-theme', next ? 'light' : 'dark');
+  }
 
-    <div className={styles.columns}>
-      <section className={styles.panel}>
-        <div className={styles.panelHeading}><div><span className={styles.kicker}>TENTANG AKUN</span><h2>Informasi profil</h2></div><ShieldCheck size={19} /></div>
-        <dl className={styles.details}>
-          <div><dt>User ID</dt><dd><code>VALK-000123</code><small>Contoh format, bukan ID akun</small></dd></div>
-          <div><dt>Username</dt><dd>@username-kamu<small>Ditentukan saat pendaftaran</small></dd></div>
-          <div><dt>Member sejak</dt><dd>Terisi setelah akun dibuat</dd></div>
-          <div><dt>Status member</dt><dd>Rakyat Biasa<small>Status aktual dikelola oleh sistem akun</small></dd></div>
-          <div><dt>Bio</dt><dd>{bio || 'Bio kamu akan tampil di sini.'}</dd></div>
-        </dl>
-      </section>
+  function claimGift(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!code.trim()) { setNotice('Masukkan kode hadiah terlebih dahulu.'); return; }
+    setClaimed(true);
+  }
 
-      <section className={styles.panel}>
-        <div className={styles.panelHeading}><div><span className={styles.kicker}>PERSONALISASI</span><h2>Edit profil</h2></div><Settings2 size={19} /></div>
-        <form className={styles.form} onSubmit={savePreview}>
-          <label>Nama tampilan<input value={displayName} maxLength={40} onChange={(event) => setDisplayName(event.target.value)} /></label>
-          <label>Bio singkat<textarea value={bio} maxLength={240} rows={4} placeholder="Tulis sedikit tentang dirimu…" onChange={(event) => setBio(event.target.value)} /></label>
-          <p>Perubahan ini hanya disimpan di browser untuk preview.</p>
-          <button>Simpan preview profil</button>
-          {message && <span className={styles.notice} role="status">{message}</span>}
-        </form>
-      </section>
-    </div>
+  return <main id="top" className={`${styles.page} ${light ? styles.light : ''}`}>
+    <header className={styles.header}><Link href="/" className={styles.brand}><span>V</span> VALKRIE<span>X969</span></Link><span className={styles.headerLabel}>PROFIL KOMUNITAS</span></header>
+    <section className={styles.previewBanner}><span>MODE PREVIEW</span><p>Profil dan tukar kode hadiah ini masih pratinjau. Perubahan hanya tersimpan di browser.</p></section>
 
-    <section className={styles.activity}>
-      <div className={styles.panelHeading}><div><span className={styles.kicker}>AKTIVITAS</span><h2>Area akun</h2></div><Clock3 size={19} /></div>
-      <div className={styles.shortcuts}>
-        <Link href="/requests"><span><b>Request saya</b><small>Riwayat request tampil setelah akun tersambung.</small></span><ArrowRight size={16} /></Link>
-        <Link href="/favorites"><span><b>Favorit tools</b><small>Daftar favorit tersimpan per akun.</small></span><Heart size={16} /></Link>
-        <Link href="/account/preferences"><span><b>Preferensi</b><small>Tema, bahasa, dan pilihan notifikasi.</small></span><ArrowRight size={16} /></Link>
+    <section className={styles.profileCard} aria-label="Profil komunitas">
+      <div className={styles.cover} style={banner ? { backgroundImage: `linear-gradient(90deg,#240c16aa,#240c1640),url(${banner})` } : undefined}>
+        <span className={styles.coverGlow} />
+        <label className={styles.coverEdit} aria-label="Ganti banner"><Camera size={17} /><input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => chooseImage(event, 'banner')} /></label>
       </div>
+      <div className={styles.identity}>
+        <label className={styles.avatarEdit} aria-label="Ganti avatar"><span className={styles.avatar}>{avatar ? <img src={avatar} alt="Avatar preview" /> : <UserRound size={43} />}</span><i><Camera size={13} /></i><input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => chooseImage(event, 'avatar')} /></label>
+        <div className={styles.bioBubble}><button type="button" aria-label="Edit bio" onClick={() => setEditing(true)}><Pencil size={12} /></button><span>{bio || <em>Tulis bio kamu di sini...</em>}</span></div>
+      </div>
+      <div className={styles.nameRow}><button type="button" className={styles.nameButton} onClick={() => setEditing(true)}><b>{username}</b><Pencil size={14} /><ChevronDown size={15} /></button></div>
+      <div className={styles.idRow}><span>ID: <b>{userId}</b></span><button type="button" aria-label="Salin ID" onClick={copyId}><Copy size={14} /></button><small>ID contoh</small></div>
+      <div className={styles.badges} aria-label="Slot lencana kosong"><span /><span /><span /></div>
+      {notice && <p className={styles.notice} role="status">{notice}</p>}
     </section>
-    <footer className={styles.footer}><Link href="/">← Kembali ke beranda</Link><span>Login, penyimpanan akun, dan status member aktif setelah Supabase dikonfigurasi.</span></footer>
+
+    {editing && <form className={styles.editPanel} onSubmit={saveProfile}><div><span className={styles.kicker}>EDIT PROFIL</span><button type="button" aria-label="Tutup edit" onClick={() => setEditing(false)}><X size={16} /></button></div><label>Username<input value={username} maxLength={32} onChange={(event) => setUsername(event.target.value)} /></label><label>Bio<textarea value={bio} maxLength={160} rows={3} placeholder="Tulis bio kamu di sini..." onChange={(event) => setBio(event.target.value)} /></label><button className={styles.saveButton}>Simpan perubahan preview</button></form>}
+
+    <section className={styles.giftCard}>
+      <div className={styles.giftHeading}><span className={styles.giftIcon}><Gift size={19} /></span><div><span className={styles.kicker}>HADIAH KOMUNITAS</span><h2>Tukar Kode Hadiah</h2></div></div>
+      <form className={styles.giftForm} onSubmit={claimGift}><label className={styles.srOnly} htmlFor="gift-code">Kode hadiah</label><input id="gift-code" value={code} onChange={(event) => setCode(event.target.value)} placeholder="Masukkan kode hadiah di sini..." /><button>Klaim Hadiah</button></form>
+      <p className={styles.previewHint}>Preview saja · klaim belum terhubung ke akun atau sistem hadiah.</p>
+    </section>
+
+    <section className={styles.menuCard} aria-label="Pengaturan profil">
+      <Link href="/account/preferences"><span className={styles.menuIcon}><Settings2 size={17} /></span><span><b>Personal Information</b><small>Profil dan preferensi akun</small></span><ArrowRight size={15} /></Link>
+      <Link href="/contact"><span className={styles.menuIcon}><HelpCircle size={17} /></span><span><b>Need help?</b><small>Kontak admin Valkrie Tools</small></span><ArrowRight size={15} /></Link>
+      <Link href="/privacy"><span className={styles.menuIcon}><LockKeyhole size={17} /></span><span><b>Privacy Policy</b><small>Informasi privasi pengguna</small></span><ArrowRight size={15} /></Link>
+      <button type="button" onClick={toggleTheme}><span className={styles.menuIcon}>{light ? <Moon size={17} /> : <Sun size={17} />}</span><span><b>Theme</b><small>{light ? 'Mode terang' : 'Mode gelap'}</small></span><span className={styles.themeAction}>{light ? 'Gelap' : 'Terang'}</span></button>
+    </section>
+
+    <button type="button" className={styles.editCta} onClick={() => { setEditing(!editing); document.getElementById('top')?.scrollIntoView({ behavior: 'smooth' }); }}><Pencil size={17} /> Edit Profile</button>
+    <footer className={styles.footer}><Link href="/">← Kembali ke Valkrie Tools</Link><span>Profil komunitas · pratinjau</span></footer>
+
+    {claimed && <div className={styles.overlay} role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setClaimed(false); }}><section className={styles.successModal} role="dialog" aria-modal="true" aria-labelledby="success-title"><button className={styles.modalClose} aria-label="Tutup" onClick={() => setClaimed(false)}><X size={18} /></button><span className={styles.successIcon}><Check size={31} /></span><h2 id="success-title">Hadiah Berhasil Diklaim!</h2><p>Kode valid. Hadiah telah ditambahkan ke akun kamu</p><small>Pratinjau visual · hadiah belum tersimpan ke akun.</small><button className={styles.okayButton} onClick={() => { setClaimed(false); setCode(''); }}>Okay, Thanks</button></section></div>}
   </main>;
 }
