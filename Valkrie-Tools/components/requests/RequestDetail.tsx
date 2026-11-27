@@ -77,6 +77,7 @@ export function RequestDetail({ request, comments, loggedIn, viewerId, previewMo
       <h1>{request.name}</h1>
       <div className="request-detail-author"><Link href={`/u/${request.author_username}`}><b>{request.author_name}</b></Link><span className={request.author_role === 'admin' ? 'author-admin' : request.author_membership_tier === 'vip' ? 'author-vip' : ''}>{request.author_role === 'admin' ? 'ADMIN' : request.author_membership_tier === 'vip' ? 'RAKYAT VIP' : 'RAKYAT BIASA'}</span><small>{request.author_user_id}{request.author_city ? ` · ${request.author_city}` : ''} · {new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(request.created_at))}</small></div>
       <p className="request-detail-description">{request.description}</p>
+      {request.image_path && process.env.NEXT_PUBLIC_SUPABASE_URL && <img className="request-attachment request-attachment-detail" src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/request-attachments/${request.image_path}`} alt={`Lampiran untuk ${request.name}`} />}
       {request.tags?.length > 0 && <div className="request-tags">{request.tags.map((tag) => <span key={tag}>#{tag}</span>)}</div>}
       {request.reference_url && <a className="request-reference" href={request.reference_url} target="_blank" rel="noreferrer">Buka link referensi ↗</a>}
       {request.admin_reply && <div className="request-admin-reply"><b>Balasan admin</b><p>{request.admin_reply}</p></div>}

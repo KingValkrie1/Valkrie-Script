@@ -1,6 +1,8 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { EditProfileForm } from '@/components/auth/EditProfileForm';
+import { ProfilePhotoForm } from '@/components/auth/ProfilePhotoForm';
+import { DeactivateAccountForm, PasswordChangeForm } from '@/components/auth/AccountSecurityForms';
 import { SignOutButton } from '@/components/auth/SignOutButton';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
@@ -22,6 +24,7 @@ export default async function ProfilePage() {
       <span className="auth-kicker">PROFIL VALKRIE TOOLS</span>
       <h1>{profile.display_name}</h1>
       <span className={`profile-role role-${profile.role === 'admin' ? 'admin' : vipActive ? 'vip' : 'member'}`}>{badge}</span>
+      <ProfilePhotoForm avatarUrl={profile.avatar_url} displayName={profile.display_name} />
       <dl className="profile-details">
         <div><dt>User ID</dt><dd>{profile.user_id}</dd></div>
         <div><dt>Username</dt><dd>@{profile.username}</dd></div>
@@ -32,10 +35,12 @@ export default async function ProfilePage() {
         {profile.bio && <div><dt>Bio</dt><dd>{profile.bio}</dd></div>}
       </dl>
       <EditProfileForm displayName={profile.display_name} bio={profile.bio} city={profile.city} canSetCity={Boolean(vipActive)} />
+      <PasswordChangeForm />
       <Link href={`/u/${profile.username}`} className="profile-home-link">Lihat profil publik →</Link>
       <section className="profile-my-requests"><div><span className="auth-kicker">AKTIVITAS</span><h2>Request saya</h2></div>{ownRequests?.length ? ownRequests.map((item) => <article key={item.id}>{item.hidden ? <span>{item.name} <small>· disembunyikan admin</small></span> : <Link href={`/requests/${item.id}`}>{item.name} <small>· REQ-{item.request_number}</small></Link>}<b className={`request-status status-${item.status}`}>{({ pending: 'Menunggu', processing: 'Diproses', completed: 'Selesai', rejected: 'Ditolak', duplicate: 'Duplikat' } as Record<string, string>)[item.status] || item.status}</b><small>{item.admin_reply ? 'Sudah dibalas admin' : 'Belum dibalas admin'}</small></article>) : <p>Belum ada request yang kamu ajukan. <Link href="/requests">Buka Request Board</Link></p>}</section>
       <p className="auth-setup-note">Favorit katalog saat ini masih tersimpan di browser ini.</p>
       <SignOutButton />
+      <DeactivateAccountForm />
       <Link href="/" className="profile-home-link">Kembali ke katalog</Link>
     </section>
   </main>;

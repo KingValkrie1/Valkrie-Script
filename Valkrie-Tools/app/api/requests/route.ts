@@ -20,7 +20,16 @@ export async function POST(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Masuk dulu untuk mengajukan tool.' }, { status: 401 });
 
-    const body = await request.json();
+    const contentType = request.headers.get('content-type') || '';
+    let body: Record<string, FormDataEntryValue | unknown>;
+    let image: File | null = null;
+    if (contentType.includes('multipart/form-data')) {
+      const form = await request.formData();
+      image = form.get('image') instanceof File && (form.get('image') as File).size > 0 ? form.get('image') as File : null;
+      body = Object.fromEntries(Array.from(form.entries()).filter(([key]) => key !== 'image'));
+    } else {
+      body = await request.json();
+    }
     const name = typeof body.name === 'string' ? body.name.trim() : '';
     const description = typeof body.description === 'string' ? body.description.trim() : '';
     const category = typeof body.category === 'string' ? body.category : '';
@@ -34,10 +43,23 @@ export async function POST(request: NextRequest) {
       catch { return NextResponse.json({ error: 'Link referensi harus berupa URL http atau https.' }, { status: 400 }); }
     }
 
+    if (image && (!['image/jpeg', 'image/png', 'image/webp'].includes(image.type) || image.size > 5 * 1024 * 1024)) {
+      return NextResponse.json({ error: 'Gambar harus JPG, PNG, atau WebP maksimal 5 MB.' }, { status: 400 });
+    }
+    const requestId = crypto.randomUUID();
+    let imagePath: string | null = null;
+    if (image) {
+      const extension = image.type === 'image/jpeg' ? 'jpg' : image.type === 'image/png' ? 'png' : 'webp';
+      imagePath = `${user.id}/${requestId}.${extension}`;
+      const { error: uploadError } = await supabase.storage.from('request-attachments').upload(imagePath, image, { contentType: image.type, cacheControl: '3600', upsert: false });
+      if (uploadError) return NextResponse.json({ error: 'Gambar belum bisa diunggah. Pastikan migration penyimpanan request sudah dijalankan.' }, { status: 400 });
+    }
+
     const { data, error } = await supabase.from('tool_requests').insert({
-      user_id: user.id, name, category, description, reference_url: referenceUrl || null, tags,
+      id: requestId, user_id: user.id, name, category, description, reference_url: referenceUrl || null, tags, image_path: imagePath,
     }).select('id').single();
     if (error) {
+      if (imagePath) await supabase.storage.from('request-attachments').remove([imagePath]);
       if (error.message.includes('quota')) return NextResponse.json({ error: 'Kuota request mingguanmu sudah habis.' }, { status: 429 });
       return NextResponse.json({ error: 'Request belum berhasil disimpan. Coba lagi nanti.' }, { status: 400 });
     }

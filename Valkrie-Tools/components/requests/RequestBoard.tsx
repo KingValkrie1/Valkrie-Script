@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { ArrowUp, Search, Send, SlidersHorizontal } from 'lucide-react';
 
@@ -18,6 +18,7 @@ export type BoardRequest = {
   category: string;
   description: string;
   reference_url: string | null;
+  image_path?: string | null;
   tags: string[];
   status: 'pending' | 'processing' | 'completed' | 'rejected' | 'duplicate';
   admin_reply: string | null;
@@ -47,6 +48,12 @@ export function RequestBoard({ initialRequests, loggedIn, previewMode = false }:
   const [formOpen, setFormOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState('');
+  const [quota, setQuota] = useState<{ membership_tier: string; request_limit: number; remaining: number; resets_at: string | null } | null>(null);
+
+  useEffect(() => {
+    if (!loggedIn || previewMode) return;
+    fetch('/api/requests/quota').then((response) => response.ok ? response.json() : null).then((result) => { if (result?.quota) setQuota(result.quota); }).catch(() => {});
+  }, [loggedIn, previewMode]);
 
   const filtered = useMemo(() => requests.filter((item) => {
     const matchesText = `${item.name} ${item.description} ${item.author_name} ${item.author_user_id} ${item.tags.join(' ')}`.toLowerCase().includes(search.toLowerCase());
@@ -56,9 +63,9 @@ export function RequestBoard({ initialRequests, loggedIn, previewMode = false }:
   async function submitRequest(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true); setNotice('');
     if (previewMode) { setNotice('Mode preview: request tidak disimpan karena database belum disambungkan.'); setBusy(false); return; }
-    const values = Object.fromEntries(new FormData(event.currentTarget).entries());
+    const values = new FormData(event.currentTarget);
     try {
-      const response = await fetch('/api/requests', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(values) });
+      const response = await fetch('/api/requests', { method: 'POST', body: values });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Request belum berhasil.');
       setNotice(result.message); setFormOpen(false); window.location.reload();
@@ -80,7 +87,7 @@ export function RequestBoard({ initialRequests, loggedIn, previewMode = false }:
 
   return <main className="request-page">
     <header className="request-top"><Link href="/" className="request-brand">← <span>VALKRIE<span>X969</span></span></Link><span>REQUEST BOARD</span></header>
-    <section className="request-intro"><span className="request-kicker">PAPAN REQUEST PUBLIK</span><h1>Bangun tools <em>bareng.</em></h1><p>Ajukan ide, dukung request yang kamu butuhkan, dan pantau statusnya.</p>{previewMode && <p className="preview-mode-banner">Preview tampilan · data contoh · belum tersimpan ke database</p>}<button className="request-submit-open" onClick={() => previewMode ? setFormOpen(!formOpen) : loggedIn ? setFormOpen(!formOpen) : window.location.assign('/login')}><Send size={16} /> Ajukan Tool</button></section>
+    <section className="request-intro"><span className="request-kicker">PAPAN REQUEST PUBLIK</span><h1>Bangun tools <em>bareng.</em></h1><p>Ajukan ide, dukung request yang kamu butuhkan, dan pantau statusnya.</p>{previewMode && <p className="preview-mode-banner">Preview tampilan · data contoh · belum tersimpan ke database</p>}{quota && <p className="request-quota">Sisa kuota minggu ini: <b>{quota.remaining}/{quota.request_limit}</b> · {quota.membership_tier === 'vip' ? 'Rakyat VIP' : 'Rakyat Biasa'}{quota.resets_at ? ` · reset ${new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(quota.resets_at))}` : ''}</p>}{previewMode && <p className="request-quota">Contoh kuota: Rakyat Biasa 1 request/minggu · Rakyat VIP 3 request/minggu</p>}<button className="request-submit-open" onClick={() => previewMode ? setFormOpen(!formOpen) : loggedIn ? setFormOpen(!formOpen) : window.location.assign('/login')}><Send size={16} /> Ajukan Tool</button></section>
     {formOpen && <form className="request-form" onSubmit={submitRequest}>
       <div className="request-form-head"><h2>Request tool baru</h2><button type="button" onClick={() => setFormOpen(false)}>Tutup</button></div>
       <label>Nama tool<input name="name" minLength={2} maxLength={120} placeholder="Contoh: PDF merge online" required /></label>
@@ -88,6 +95,7 @@ export function RequestBoard({ initialRequests, loggedIn, previewMode = false }:
       <label>Deskripsi<textarea name="description" minLength={10} maxLength={5000} rows={4} placeholder="Jelaskan fungsi dan siapa yang akan terbantu…" required /></label>
       <label>Link referensi <small>opsional</small><input name="referenceUrl" type="url" placeholder="https://…" /></label>
       <label>Tag <small>pisahkan dengan koma</small><input name="tags" placeholder="fitur baru, produktivitas" /></label>
+      <label>Gambar pendukung <small>opsional · JPG, PNG, atau WebP · maks. 5 MB</small><input name="image" type="file" accept="image/jpeg,image/png,image/webp" /></label>
       <p className="request-disclaimer">Pastikan request mengikuti aturan dan ketentuan layanan pihak ketiga yang dicantumkan. Request yang melanggar kebijakan bisa ditolak.</p>
       {notice && <p className="request-notice" role="status">{notice}</p>}
       <button className="request-submit-open" disabled={busy}>{busy ? 'Mengirim…' : 'Kirim request'}</button>
@@ -100,6 +108,7 @@ export function RequestBoard({ initialRequests, loggedIn, previewMode = false }:
       {filtered.length ? <div className="request-list">{filtered.map((item) => <article className={`request-card ${item.pinned ? 'is-pinned' : ''}`} key={item.id}>
         <div className="request-card-meta"><span className={`request-status status-${item.status}`}>{statusNames[item.status]}</span><span>{categoryNames[item.category] || item.category}</span>{item.pinned && <span className="request-pin">PINNED</span>}</div>
         <h3><Link className="request-card-title" href={`/requests/${item.id}`}>{item.name}</Link></h3><p className="request-description">{item.description}</p>
+        {item.image_path && process.env.NEXT_PUBLIC_SUPABASE_URL && <img className="request-attachment" src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/request-attachments/${item.image_path}`} alt={`Lampiran untuk ${item.name}`} loading="lazy" />}
         {item.admin_reply && <div className="request-admin-reply"><b>Balasan admin</b><p>{item.admin_reply}</p></div>}
         {item.rejection_reason && <div className="request-rejection"><b>Alasan</b><p>{item.rejection_reason}</p></div>}
         <div className="request-card-footer"><div className="request-author"><Link href={`/u/${item.author_username}`}>{item.author_name}</Link><b className={item.author_role === 'admin' ? 'author-admin' : item.author_membership_tier === 'vip' ? 'author-vip' : ''}>{item.author_role === 'admin' ? 'ADMIN' : item.author_membership_tier === 'vip' ? 'RAKYAT VIP' : 'RAKYAT BIASA'}</b><small>{item.author_user_id}{item.author_city ? ` · ${item.author_city}` : ''}</small><time>{new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(item.created_at))}</time><Link className="request-comment-count" href={`/requests/${item.id}`}>{item.comment_count} komentar · Detail</Link></div><button className="request-vote" aria-label={`Vote ${item.name}`} onClick={() => vote(item.id)}><ArrowUp size={17} /><span>{item.vote_count}</span><small>Vote</small></button></div>
