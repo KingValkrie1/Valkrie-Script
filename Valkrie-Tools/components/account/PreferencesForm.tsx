@@ -31,7 +31,10 @@ export function PreferencesForm({ initialPreferences }: { initialPreferences: Ac
     try {
       const response = await fetch('/api/account/preferences', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(preferences) });
       const result = await response.json();
-      setMessage(response.ok ? result.message : result.error || 'Preferensi belum bisa disimpan.');
+      if (response.ok) {
+        window.dispatchEvent(new CustomEvent('valkrie-preferences-changed', { detail: { theme: preferences.theme, language: preferences.language } }));
+        setMessage(result.message);
+      } else setMessage(result.error || 'Preferensi belum bisa disimpan.');
     } catch {
       setMessage('Koneksi belum tersedia. Preferensi belum disimpan.');
     }
@@ -42,9 +45,9 @@ export function PreferencesForm({ initialPreferences }: { initialPreferences: Ac
     <section className={styles.section}><span className={styles.kicker}>NOTIFIKASI AKUN</span><h2>Pilihan notifikasi</h2><p>Preferensi ini disimpan ke akun. Pengiriman email belum aktif sebelum provider email dikonfigurasi.</p>
       {notificationItems.map(([key, title, description]) => <label className={styles.toggleRow} key={key}><span><b>{title}</b><small>{description}</small></span><input type="checkbox" checked={preferences[key]} onChange={(event) => setPreferences({ ...preferences, [key]: event.target.checked })} aria-label={title} /></label>)}
     </section>
-    <section className={styles.section}><span className={styles.kicker}>TAMPILAN</span><h2>Tema dan bahasa</h2><p>Pilihan tema dan bahasa tersimpan di profil akun.</p>
+    <section className={styles.section}><span className={styles.kicker}>TAMPILAN</span><h2>Tema dan bahasa</h2><p>Tema diterapkan di halaman utama, katalog, akun, dan Request Board. Pilihan English mengatur metadata bahasa; terjemahan teks halaman belum tersedia.</p>
       <label className={styles.selectRow}>Tema<select value={preferences.theme} onChange={(event) => setPreferences({ ...preferences, theme: event.target.value as AccountPreferences['theme'] })}><option value="dark">Gelap</option><option value="light">Terang</option></select></label>
-      <label className={styles.selectRow}>Bahasa<select value={preferences.language} onChange={(event) => setPreferences({ ...preferences, language: event.target.value as AccountPreferences['language'] })}><option value="id">Bahasa Indonesia</option><option value="en">English</option></select></label>
+      <label className={styles.selectRow}>Bahasa<select value={preferences.language} onChange={(event) => setPreferences({ ...preferences, language: event.target.value as AccountPreferences['language'] })}><option value="id">Bahasa Indonesia</option><option value="en">English · metadata saja</option></select></label>
     </section>
     {message && <p className={styles.message} role="status">{message}</p>}
     <button className={styles.save} disabled={busy}>{busy ? 'Menyimpan…' : 'Simpan preferensi'}</button>

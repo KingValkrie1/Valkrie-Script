@@ -60,3 +60,13 @@
 @media(max-width:800px) { .grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:560px) { .page { padding:0 15px 30px; }.header { min-height:62px; }.header nav { gap:13px; }.header nav a { font-size:10px; }.hero { margin:20px 0 27px; padding:33px 21px; border-radius:18px; }.hero h1 { font-size:49px; }.hero>p { font-size:12px; }.heroMeta { gap:7px; }.heroMeta span { padding:7px 9px; font-size:9px; }.grid { grid-template-columns:1fr; gap:9px; }.card { min-height:205px; }.catalogHeading h2 { font-size:22px; }.search { height:46px; }.footer { flex-wrap:wrap; font-size:9px; }.detailHero { margin:38px auto 28px; }.backLink { margin-bottom:27px; }.detailInfo { padding:17px; } }
 @media(prefers-reduced-motion:reduce) { .card { transition:none; } }
+:global(html[data-theme='light']) .page { color:#282820; }
+:global(html[data-theme='light']) .header { border-color:#d8d4c7; }
+:global(html[data-theme='light']) .header nav a,:global(html[data-theme='light']) .header>a:last-child,:global(html[data-theme='light']) .brand { color:#4f4e46; }
+:global(html[data-theme='light']) .hero { border-color:#e0d9bc; background:radial-gradient(ellipse at 82% 10%,#e8c93129,transparent 38%),linear-gradient(135deg,#fffef8,#f3f0e5 70%); }
+:global(html[data-theme='light']) .hero>p,:global(html[data-theme='light']) .card p,:global(html[data-theme='light']) .detailHero>p,:global(html[data-theme='light']) .detailInfo li { color:#5e5d55; }
+:global(html[data-theme='light']) .search,:global(html[data-theme='light']) .filters button,:global(html[data-theme='light']) .card,:global(html[data-theme='light']) .detailInfo { border-color:#ddd8ca; background:#fffefa; color:#292920; }
+:global(html[data-theme='light']) .search input { color:#292920; }
+:global(html[data-theme='light']) .filters button { color:#55544c; }
+:global(html[data-theme='light']) .cardBottom { border-color:#e8e4d9; }
+:global(html[data-theme='light']) .footer { border-color:#ddd8ca; color:#68675e; }

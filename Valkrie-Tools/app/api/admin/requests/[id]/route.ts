@@ -37,3 +37,22 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
     return NextResponse.json({ error: 'Perubahan request belum bisa diproses.' }, { status: 503 });
   }
 }
+
+export async function DELETE(_request: NextRequest, { params }: { params: { id: string } }) {
+  if (!uuidPattern.test(params.id)) return NextResponse.json({ error: 'Request tidak ditemukan.' }, { status: 404 });
+  try {
+    const supabase = await createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: 'Masuk sebagai admin untuk mengelola request.' }, { status: 401 });
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle();
+    if (profile?.role !== 'admin') return NextResponse.json({ error: 'Akses admin diperlukan.' }, { status: 403 });
+
+    const { data: request, error } = await supabase.from('tool_requests').delete().eq('id', params.id).select('id,request_number,name').maybeSingle();
+    if (error) return NextResponse.json({ error: 'Request belum berhasil dihapus.' }, { status: 400 });
+    if (!request) return NextResponse.json({ error: 'Request tidak ditemukan.' }, { status: 404 });
+    await supabase.from('admin_activity').insert({ admin_id: user.id, action: 'request.deleted', target_type: 'request', target_id: params.id, details: { request_number: request.request_number, name: request.name } });
+    return NextResponse.json({ ok: true, message: `REQ-${request.request_number} berhasil dihapus.` });
+  } catch {
+    return NextResponse.json({ error: 'Request belum bisa dihapus.' }, { status: 503 });
+  }
+}

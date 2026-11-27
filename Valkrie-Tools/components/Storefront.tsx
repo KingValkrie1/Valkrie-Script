@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState, type PointerEvent as ReactPointerEvent } from 'react';
-import { Bell, Bookmark, ChevronRight, CircleHelp, Clock3, Crown, Gamepad2, Headphones, Heart, House, Menu, MessageSquarePlus, Moon, Search, Settings2, Sun, UserRound, Volume2, VolumeX, Wrench, X, Zap } from 'lucide-react';
+import { Bell, Bookmark, ChevronRight, CircleHelp, Clock3, Crown, Gamepad2, Headphones, Heart, Menu, MessageSquarePlus, Moon, Search, Settings2, Sun, UserRound, Volume2, VolumeX, Wrench, X, Zap } from 'lucide-react';
 import { categories, products, type Product } from '@/data/products';
 
 const channelUrl = 'https://whatsapp.com/channel/0029VbAq9wH4inozYo8E9z2s';
@@ -14,7 +14,6 @@ export function Storefront() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [light, setLight] = useState(false);
   const [muted, setMuted] = useState(true);
-  const [activeNav, setActiveNav] = useState('home');
   const [profileOpen, setProfileOpen] = useState(false);
   const [toast, setToast] = useState('');
 
@@ -24,6 +23,11 @@ export function Storefront() {
       setRecent(JSON.parse(localStorage.getItem('valkrie-recent') || '[]'));
       setLight(localStorage.getItem('valkrie-theme') === 'light');
     } catch { /* Use an empty storefront state if saved data is unavailable. */ }
+  }, []);
+  useEffect(() => {
+    const syncTheme = (event: Event) => setLight((event as CustomEvent<string>).detail === 'light');
+    window.addEventListener('valkrie-theme-applied', syncTheme);
+    return () => window.removeEventListener('valkrie-theme-applied', syncTheme);
   }, []);
   useEffect(() => { if (!toast) return; const id = window.setTimeout(() => setToast(''), 2400); return () => window.clearTimeout(id); }, [toast]);
 
@@ -43,9 +47,18 @@ export function Storefront() {
     setRecent(next); localStorage.setItem('valkrie-recent', JSON.stringify(next));
     window.open(product.websiteUrl, '_blank', 'noopener,noreferrer');
   }
-  function toggleTheme() { const next = !light; setLight(next); localStorage.setItem('valkrie-theme', next ? 'light' : 'dark'); }
+  function toggleTheme() {
+    const next = !light;
+    setLight(next);
+    localStorage.setItem('valkrie-theme', next ? 'light' : 'dark');
+    try {
+      const saved = JSON.parse(localStorage.getItem('valkrie-account-display-preferences') || '{"language":"id"}');
+      localStorage.setItem('valkrie-account-display-preferences', JSON.stringify({ ...saved, theme: next ? 'light' : 'dark' }));
+    } catch { /* The local theme still works if preference storage is unavailable. */ }
+    document.documentElement.dataset.theme = next ? 'light' : 'dark';
+    window.dispatchEvent(new CustomEvent('valkrie-theme-applied', { detail: next ? 'light' : 'dark' }));
+  }
   function navigateTo(id: string, tab: string) {
-    setActiveNav(tab);
     if (tab === 'request') { window.location.assign('/requests'); return; }
     if (tab === 'profile') { setProfileOpen(true); return; }
     setProfileOpen(false);
@@ -102,16 +115,9 @@ export function Storefront() {
       <section className="store-section" id="products"><div className="store-section-heading"><h2 className="store-section-title">Semua <em>produk</em></h2><span>{filtered.length} item</span></div>{filtered.length ? <div className="store-grid">{filtered.map((product, index) => card(product, index))}</div> : <div className="store-empty">Belum ada produk untuk filter ini.</div>}</section>
       <footer id="footer" className="store-footer"><a href="#top">VALKRIE X969</a><span>Valkrie Tools · katalog digital</span><a href="#top">Kembali ke atas ↑</a></footer>
     </main>
-    <nav className="bottom-nav" aria-label="Navigasi utama">
-      <button className={activeNav === 'home' ? 'active' : ''} aria-current={activeNav === 'home' ? 'page' : undefined} onClick={() => navigateTo('top', 'home')}><House size={19} /><span>Beranda</span></button>
-      <button className={activeNav === 'products' ? 'active' : ''} aria-current={activeNav === 'products' ? 'page' : undefined} onClick={() => navigateTo('products', 'products')}><Search size={19} /><span>Produk</span></button>
-      <button className={activeNav === 'request' ? 'active' : ''} aria-current={activeNav === 'request' ? 'page' : undefined} onClick={() => navigateTo('requests', 'request')}><MessageSquarePlus size={19} /><span>Request</span></button>
-      <button className={activeNav === 'favorites' ? 'active' : ''} aria-current={activeNav === 'favorites' ? 'page' : undefined} onClick={() => navigateTo('products', 'favorites')}><Heart size={19} /><span>Favorit</span></button>
-      <button className={activeNav === 'profile' ? 'active' : ''} aria-current={activeNav === 'profile' ? 'page' : undefined} onClick={() => navigateTo('profile', 'profile')}><UserRound size={19} /><span>Profil</span></button>
-    </nav>
-    {profileOpen && <div className="profile-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) { setProfileOpen(false); setActiveNav('home'); } }}>
+    {profileOpen && <div className="profile-backdrop" onMouseDown={(event) => { if (event.target === event.currentTarget) setProfileOpen(false); }}>
       <section className="profile-sheet" role="dialog" aria-modal="true" aria-labelledby="profile-title">
-        <header className="profile-heading"><div><span className="profile-kicker">VALKRIE TOOLS</span><h2 id="profile-title">Profil kamu</h2></div><button className="profile-close" aria-label="Tutup profil" onClick={() => { setProfileOpen(false); setActiveNav('home'); }}><X size={19} /></button></header>
+        <header className="profile-heading"><div><span className="profile-kicker">VALKRIE TOOLS</span><h2 id="profile-title">Profil kamu</h2></div><button className="profile-close" aria-label="Tutup profil" onClick={() => setProfileOpen(false)}><X size={19} /></button></header>
         <div className="profile-account"><span className="profile-avatar"><UserRound size={25} /></span><span className="profile-account-copy"><small>AKUN VALKRIE TOOLS</small><b>Selamat datang</b><span>Masuk untuk melihat profil dan aktivitas akun.</span></span><span className="member-badge">RAKYAT</span></div>
         <div className="profile-id-row"><span>User ID</span><b>Tampil setelah kamu masuk</b></div>
         <section className="membership-block"><div className="profile-section-head"><h3>Status member</h3><span>Detail di profil</span></div><article className="member-plan"><div className="plan-icon"><Gamepad2 size={18} /></div><div><b>Rakyat Biasa</b><small>Status awal setiap akun. Kuota dan aturan request berlaku sama untuk semua.</small></div><span className="plan-active">DEFAULT</span></article><article className="vip-plan"><div className="plan-icon"><Crown size={18} /></div><div className="vip-copy"><b>Rakyat VIP</b><small>Benefit kuota dan tools premium dijelaskan di halaman VIP.</small><a href="/vip">Pelajari manfaat VIP →</a></div></article></section>

@@ -24,6 +24,9 @@ Fitur dikerjakan bertahap sesuai waktu yang tersedia. Kode tahap awal ada di bra
 - Detail tool dapat dibuka dari slug katalog; admin mendapat CRUD katalog di `/admin/tools` dengan validasi URL HTTPS, kategori, status terbit, dan penanda akses VIP.
 - Favorit tool database tersimpan per akun, bisa dikelola dari katalog/detail, dan ditampilkan di `/favorites` setelah login.
 - Halaman `/account/preferences` menyimpan pilihan notifikasi, tema, dan bahasa pada akun.
+- Pilihan tema tersinkron lintas halaman melalui preferensi akun; navigasi bawah menggunakan Beranda, Tools, Request, Favorit, Akun.
+- Moderasi admin dapat menghapus request dengan konfirmasi serta pencatatan aktivitas.
+- Navigasi bawah bersama memakai lima tujuan: Beranda, Tools, Request, Favorit, Akun.
 - `.env.example` dan petunjuk setup awal di README.
 
 ## Belum dikerjakan atau belum tersambung
@@ -32,12 +35,12 @@ Fitur dikerjakan bertahap sesuai waktu yang tersedia. Kode tahap awal ada di bra
 - Migration belum dijalankan atau diverifikasi terhadap project nyata.
 - Katalog database dan CRUD admin masih menunggu konfigurasi Supabase serta migration di project pemilik.
 - Fitur database, login, role admin, upload, favorit akun, dan preferensi belum dapat dicoba dengan data nyata sampai project Supabase dibuat dan seluruh migration dijalankan.
-- Preferensi tema/bahasa sudah tersimpan, tetapi belum diterapkan lintas halaman atau diterjemahkan ke bahasa Inggris.
+- Tema sudah diterapkan lintas halaman; pilihan English mengatur metadata bahasa, tetapi terjemahan konten belum selesai.
 - Pilihan notifikasi tersimpan, tetapi email belum dihubungkan ke provider atau trigger aktif.
 
 ## Langkah kecil berikutnya
 
 1. Buat project Supabase dan masukkan konfigurasi sendiri lewat environment variables.
 2. Hubungkan notifikasi email setelah provider email tersedia.
-3. Terapkan tema/bahasa preferensi ke seluruh halaman.
+3. Terjemahkan konten utama untuk pilihan English.
 4. Lanjutkan polish dan audit akses setelah database dapat diuji.
