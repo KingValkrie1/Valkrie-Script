@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { ArrowLeft, ArrowUpRight, Check } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { catalogCopy } from '@/data/catalog-copy';
+import { ToolFavoriteButton } from '@/components/ToolFavoriteButton';
 import { getCatalogTool } from '@/lib/tools/catalog';
 import styles from '../catalog.module.css';
 
@@ -28,6 +29,7 @@ export default async function ToolDetailPage({ params }: Props) {
       <span className={styles.eyebrow}>{product.category} · {product.platform}</span>
       <h1>{product.name}</h1>
       <p>{copy.summary}</p>
+      {product.source === 'database' && <ToolFavoriteButton slug={product.id} initialFavorite={product.favorite} />}
       <a className={styles.visitButton} href={product.websiteUrl} target="_blank" rel="noopener noreferrer">Buka situs resmi <ArrowUpRight size={17} /></a>
     </section>
     <section className={styles.detailInfo}>

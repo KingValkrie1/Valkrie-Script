@@ -38,7 +38,8 @@ export default async function ProfilePage() {
       <PasswordChangeForm />
       <Link href={`/u/${profile.username}`} className="profile-home-link">Lihat profil publik →</Link>
       <section className="profile-my-requests"><div><span className="auth-kicker">AKTIVITAS</span><h2>Request saya</h2></div>{ownRequests?.length ? ownRequests.map((item) => <article key={item.id}>{item.hidden ? <span>{item.name} <small>· disembunyikan admin</small></span> : <Link href={`/requests/${item.id}`}>{item.name} <small>· REQ-{item.request_number}</small></Link>}<b className={`request-status status-${item.status}`}>{({ pending: 'Menunggu', processing: 'Diproses', completed: 'Selesai', rejected: 'Ditolak', duplicate: 'Duplikat' } as Record<string, string>)[item.status] || item.status}</b><small>{item.admin_reply ? 'Sudah dibalas admin' : 'Belum dibalas admin'}</small></article>) : <p>Belum ada request yang kamu ajukan. <Link href="/requests">Buka Request Board</Link></p>}</section>
-      <p className="auth-setup-note">Favorit katalog saat ini masih tersimpan di browser ini.</p>
+      <Link href="/favorites" className="profile-home-link">Lihat favorit tools akun →</Link>
+      <Link href="/account/preferences" className="profile-home-link">Atur preferensi akun →</Link>
       <SignOutButton />
       <DeactivateAccountForm />
       <Link href="/" className="profile-home-link">Kembali ke katalog</Link>

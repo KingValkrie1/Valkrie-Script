@@ -11,5 +11,6 @@ export const dynamic = 'force-dynamic';
 
 export default async function ToolsPage() {
   const tools = await getCatalogTools();
-  return <ToolCatalog products={tools} />;
+  const source = tools[0]?.source ?? (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'database' : 'contoh');
+  return <ToolCatalog products={tools} source={source} />;
 }

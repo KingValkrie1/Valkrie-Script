@@ -22,6 +22,8 @@ Fitur dikerjakan bertahap sesuai waktu yang tersedia. Kode tahap awal ada di bra
 - Profil pribadi menampilkan riwayat 20 request terakhir beserta status balasan admin.
 - Katalog `/tools` membaca tools terbit dari tabel database saat Supabase tersedia, dengan katalog contoh yang diberi label saat konfigurasi belum tersedia.
 - Detail tool dapat dibuka dari slug katalog; admin mendapat CRUD katalog di `/admin/tools` dengan validasi URL HTTPS, kategori, status terbit, dan penanda akses VIP.
+- Favorit tool database tersimpan per akun, bisa dikelola dari katalog/detail, dan ditampilkan di `/favorites` setelah login.
+- Halaman `/account/preferences` menyimpan pilihan notifikasi, tema, dan bahasa pada akun.
 - `.env.example` dan petunjuk setup awal di README.
 
 ## Belum dikerjakan atau belum tersambung
@@ -29,12 +31,13 @@ Fitur dikerjakan bertahap sesuai waktu yang tersedia. Kode tahap awal ada di bra
 - Belum ada project Supabase milik pengguna, jadi database, login, role admin, upload, dan pengiriman email belum dapat dicoba dengan data nyata.
 - Migration belum dijalankan atau diverifikasi terhadap project nyata.
 - Katalog database dan CRUD admin masih menunggu konfigurasi Supabase serta migration di project pemilik.
-- Favorit tools yang tersimpan per akun dan UI preferensi notifikasi/tema/bahasa belum selesai; tabel preferensi dan bookmark tool sudah tersedia di migration awal.
-- Notifikasi email belum dihubungkan ke provider atau trigger yang aktif.
+- Fitur database, login, role admin, upload, favorit akun, dan preferensi belum dapat dicoba dengan data nyata sampai project Supabase dibuat dan seluruh migration dijalankan.
+- Preferensi tema/bahasa sudah tersimpan, tetapi belum diterapkan lintas halaman atau diterjemahkan ke bahasa Inggris.
+- Pilihan notifikasi tersimpan, tetapi email belum dihubungkan ke provider atau trigger aktif.
 
 ## Langkah kecil berikutnya
 
 1. Buat project Supabase dan masukkan konfigurasi sendiri lewat environment variables.
-2. Selesaikan favorit tools per akun dan UI preferensi.
-3. Hubungkan notifikasi email setelah provider email tersedia.
+2. Hubungkan notifikasi email setelah provider email tersedia.
+3. Terapkan tema/bahasa preferensi ke seluruh halaman.
 4. Lanjutkan polish dan audit akses setelah database dapat diuji.
