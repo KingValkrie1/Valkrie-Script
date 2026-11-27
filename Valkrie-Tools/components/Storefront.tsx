@@ -29,6 +29,11 @@ export function Storefront() {
     window.addEventListener('valkrie-theme-applied', syncTheme);
     return () => window.removeEventListener('valkrie-theme-applied', syncTheme);
   }, []);
+  useEffect(() => {
+    const syncFavorites = (event: Event) => setFavorites((event as CustomEvent<string[]>).detail || []);
+    window.addEventListener('valkrie-favorites-changed', syncFavorites);
+    return () => window.removeEventListener('valkrie-favorites-changed', syncFavorites);
+  }, []);
   useEffect(() => { if (!toast) return; const id = window.setTimeout(() => setToast(''), 2400); return () => window.clearTimeout(id); }, [toast]);
 
   const filtered = useMemo(() => products.filter((product) => {
@@ -41,6 +46,7 @@ export function Storefront() {
   function toggleFavorite(id: string) {
     const next = favorites.includes(id) ? favorites.filter((item) => item !== id) : [...favorites, id];
     setFavorites(next); localStorage.setItem('valkrie-favorites', JSON.stringify(next));
+    window.dispatchEvent(new CustomEvent('valkrie-favorites-changed', { detail: next }));
   }
   function openProduct(product: Product) {
     const next = [product.id, ...recent.filter((id) => id !== product.id)].slice(0, 5);
