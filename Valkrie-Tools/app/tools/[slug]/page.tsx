@@ -2,25 +2,23 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft, ArrowUpRight, Check } from 'lucide-react';
 import { notFound } from 'next/navigation';
-import { products } from '@/data/products';
 import { catalogCopy } from '@/data/catalog-copy';
+import { getCatalogTool } from '@/lib/tools/catalog';
 import styles from '../catalog.module.css';
 
 type Props = { params: { slug: string } };
 
-export function generateStaticParams() {
-  return products.map((product) => ({ slug: product.id }));
-}
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const product = products.find((item) => item.id === params.slug);
+  const product = await getCatalogTool(params.slug);
   return { title: product ? product.name : 'Tools' };
 }
 
-export default function ToolDetailPage({ params }: Props) {
-  const product = products.find((item) => item.id === params.slug);
+export default async function ToolDetailPage({ params }: Props) {
+  const product = await getCatalogTool(params.slug);
   if (!product) notFound();
-  const copy = catalogCopy[product.id];
+  const copy = catalogCopy[product.id] || { summary: product.description, useCases: [product.description] };
 
   return <main className={`${styles.page} ${styles.detailPage}`}>
     <header className={styles.header}><Link className={styles.brand} href="/">VALKRIE<span>X969</span></Link><Link href="/tools">Katalog tools</Link></header>
