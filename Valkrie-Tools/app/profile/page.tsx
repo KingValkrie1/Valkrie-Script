@@ -4,10 +4,11 @@ import { EditProfileForm } from '@/components/auth/EditProfileForm';
 import { ProfilePhotoForm } from '@/components/auth/ProfilePhotoForm';
 import { DeactivateAccountForm, PasswordChangeForm } from '@/components/auth/AccountSecurityForms';
 import { SignOutButton } from '@/components/auth/SignOutButton';
+import { ProfilePreview } from '@/components/auth/ProfilePreview';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 export default async function ProfilePage() {
-  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return <main className="auth-shell"><section className="auth-card"><h1>Profil</h1><p>Profile belum aktif. Database Supabase perlu dikonfigurasi.</p><Link href="/">Kembali ke beranda</Link></section></main>;
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) return <ProfilePreview />;
   const supabase = await createSupabaseServerClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');

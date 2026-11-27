@@ -27,6 +27,7 @@ Fitur dikerjakan bertahap sesuai waktu yang tersedia. Kode tahap awal ada di bra
 - Pilihan tema tersinkron lintas halaman melalui preferensi akun; navigasi bawah menggunakan Beranda, Tools, Request, Favorit, Akun.
 - Moderasi admin dapat menghapus request dengan konfirmasi serta pencatatan aktivitas.
 - Navigasi bawah bersama memakai lima tujuan: Beranda, Tools, Request, Favorit, Akun.
+- Halaman profil kini punya mode preview lokal saat Supabase belum diatur; nama dan bio bisa dicoba di browser, sedangkan ID, role, VIP, dan upload tidak diklaim aktif.
 - `.env.example` dan petunjuk setup awal di README.
 
 ## Belum dikerjakan atau belum tersambung
